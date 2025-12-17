@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Juniper v6.2.1</title>
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="src/css/styles.css">
+  <link rel="stylesheet" href="src/css/modals.css">
+  <link rel="stylesheet" href="src/css/voice.css">
+  <link rel="stylesheet" href="src/css/scripts.css">
+  <link rel="stylesheet" href="src/css/agents.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><div class="juniper-icon">🌿</div> Juniper</h1>
+      <p id="headerSubtitle">Your AI Voice Assistant</p>
+      <div class="version">v6.2.1</div>
+    </header>
+
+    <!-- Type Anything Card -->
+    <div class="card">
+      <h2>💬 Type Anything</h2>
+      <div class="custom-row">
+        <input type="text" class="custom-input" id="customText" placeholder="Type what Juniper should say...">
+        <button class="send-btn" onclick="speakCustom()" title="Speak the typed text">Say</button>
+      </div>
+      <div class="status-bar">
+        <div class="status-indicator">
+          <div class="status-dot" id="statusDot"></div>
+          <span class="status-text" id="statusText">Ready</span>
+        </div>
+        <button class="stop-btn" onclick="stopSpeaking()" title="Stop speaking">Stop</button>
+      </div>
+    </div>
+
+    <!-- Quick Speak Card -->
+    <div class="card">
+      <h2>📞 Quick Speak</h2>
+      <div class="main-btn-wrapper">
+        <button class="main-btn intro" onclick="speakIntro()" title="Introduce Juniper">🌿 <span id="introBtnText">"Hello, I'm Juniper..."</span></button>
+        <button class="edit-btn" onclick="editIntroBtn()" title="Edit">✏️</button>
+      </div>
+      <div class="main-btn-wrapper">
+        <button class="main-btn verify" onclick="speakVerify()" title="Hand off to verify">🎤 <span id="verifyBtnText">"Let me verify..."</span></button>
+        <button class="edit-btn" onclick="editVerifyBtn()" title="Edit">✏️</button>
+      </div>
+      <div class="tabs">
+        <button class="tab active" onclick="showTab('common',this)" title="Common phrases">Common</button>
+        <button class="tab" onclick="showTab('info',this)" title="Your info">My Info</button>
+        <button class="tab" onclick="showTab('calls',this)" title="Call phrases">Calls</button>
+      </div>
+      <div id="tab-common" class="tab-content active">
+        <div class="hotkey-grid">
+          <button class="hotkey-btn yes" data-msg="Yes, that is correct." title="Confirm"><span class="icon">✓</span><span class="label">Yes</span><span class="full-text">That is correct</span></button>
+          <button class="hotkey-btn no" data-msg="No, that is not correct." title="Deny"><span class="icon">✗</span><span class="label">No</span><span class="full-text">Not correct</span></button>
+          <button class="hotkey-btn" data-msg="Could you please repeat that?" title="Ask to repeat"><span class="icon">🔄</span><span class="label">Repeat</span><span class="full-text">Please repeat</span></button>
+          <button class="hotkey-btn" data-msg="One moment please." title="Pause"><span class="icon">⏳</span><span class="label">Moment</span><span class="full-text">One moment</span></button>
+          <button class="hotkey-btn" data-msg="Could you speak slower please?" title="Slow down"><span class="icon">🐢</span><span class="label">Slower</span><span class="full-text">Speak slower</span></button>
+          <button class="hotkey-btn" data-msg="Thank you very much." title="Thank"><span class="icon">🙏</span><span class="label">Thanks</span><span class="full-text">Thank you</span></button>
+        </div>
+      </div>
+      <div id="tab-info" class="tab-content">
+        <div class="hotkey-grid">
+          <button class="hotkey-btn" data-info="name" title="Full name"><span class="icon">👤</span><span class="label">Name</span><span class="full-text">Full name</span></button>
+          <button class="hotkey-btn" data-info="dob" title="Date of birth"><span class="icon">🎂</span><span class="label">DOB</span><span class="full-text">Date of birth</span></button>
+          <button class="hotkey-btn" data-info="phone" title="Phone number"><span class="icon">📱</span><span class="label">Phone</span><span class="full-text">Phone number</span></button>
+          <button class="hotkey-btn" data-info="address" title="Address"><span class="icon">📍</span><span class="label">Address</span><span class="full-text">Full address</span></button>
+          <button class="hotkey-btn" data-info="insurance" title="Insurance"><span class="icon">🏥</span><span class="label">Insurance</span><span class="full-text">Insurance ID</span></button>
+          <button class="hotkey-btn" data-info="pharmacy" title="Pharmacy"><span class="icon">💊</span><span class="label">Pharmacy</span><span class="full-text">Pharmacy</span></button>
+        </div>
+      </div>
+      <div id="tab-calls" class="tab-content">
+        <div class="hotkey-grid">
+          <button class="hotkey-btn" data-msg="I am calling to schedule an appointment." title="Schedule"><span class="icon">📅</span><span class="label">Appointment</span><span class="full-text">Schedule appt</span></button>
+          <button class="hotkey-btn" data-msg="I am calling to refill a prescription." title="Refill Rx"><span class="icon">💊</span><span class="label">Refill</span><span class="full-text">Refill prescription</span></button>
+          <button class="hotkey-btn" data-msg="I am calling about my test results." title="Test results"><span class="icon">📋</span><span class="label">Results</span><span class="full-text">Test results</span></button>
+          <button class="hotkey-btn" data-msg="I need to reschedule please." title="Reschedule"><span class="icon">🔄</span><span class="label">Reschedule</span><span class="full-text">Reschedule</span></button>
+          <button class="hotkey-btn" data-msg="I have a billing question." title="Billing"><span class="icon">💰</span><span class="label">Billing</span><span class="full-text">Billing question</span></button>
+          <button class="hotkey-btn" data-msg="May I speak with a nurse please?" title="Nurse"><span class="icon">👩‍⚕️</span><span class="label">Nurse</span><span class="full-text">Speak with nurse</span></button>
+        </div>
+      </div>
+      <div class="quick-scripts" id="quickScripts"></div>
+      <div class="toolbar">
+        <button class="toolbar-btn" onclick="openFullScriptsModal()" title="Full call scripts"><span class="tb-icon">📜</span>Scripts</button>
+        <button class="toolbar-btn" onclick="openAgentsModal()" title="AI settings"><span class="tb-icon">🤖</span>AI</button>
+        <button class="toolbar-btn" onclick="openVoiceModal()" title="Voice settings"><span class="tb-icon">🎤</span>Voice</button>
+        <button class="toolbar-btn" onclick="openInfoModal()" title="Your information"><span class="tb-icon">⚙️</span>Info</button>
+      </div>
+    </div>
+
+    <!-- My Scripts Card -->
+    <div class="card">
+      <div class="collapse-header" onclick="toggleCollapse('scripts')">
+        <h2 style="margin:0;">⭐ My Scripts</h2>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="clear-btn" onclick="event.stopPropagation();openMyScriptModal()" title="New script">+ New</button>
+          <span class="arrow">▼</span>
+        </div>
+      </div>
+      <div id="scripts-content" class="collapse-content collapsed">
+        <div class="scripts-grid" id="scriptsGrid"><div class="no-scripts">Tap "+ New"</div></div>
+      </div>
+    </div>
+
+    <!-- History Card -->
+    <div class="card">
+      <div class="collapse-header" onclick="toggleCollapse('history')">
+        <h2 style="margin:0;flex:1;">📜 History</h2>
+        <button class="clear-btn" onclick="event.stopPropagation();clearHistory()" title="Clear">Clear</button>
+        <span class="arrow" style="margin-left:8px;">▼</span>
+      </div>
+      <div id="history-content" class="collapse-content collapsed">
+        <div class="history-list" id="historyList"><p style="color:var(--text-muted);padding:10px;">Messages appear here</p></div>
+      </div>
+    </div>
+
+    <div class="footer">🌿 Juniper v6.2.1</div>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- My Info Modal -->
+  <div class="modal-overlay" id="infoModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>⚙️ My Information</h3>
+        <button class="modal-close" onclick="closeInfoModal()">×</button>
+      </div>
+      <div class="modal-tabs">
+        <button class="modal-tab active" onclick="showInfoTab('basic',this)">Basic</button>
+        <button class="modal-tab" onclick="showInfoTab('insurance',this)">Insurance</button>
+        <button class="modal-tab" onclick="showInfoTab('pharmacy',this)">Pharmacy</button>
+        <button class="modal-tab" onclick="showInfoTab('api',this)">API</button>
+      </div>
+      <div id="infoTab-basic" class="tab-content active">
+        <div class="form-row">
+          <div class="form-group"><label>First Name</label><input type="text" id="infoFirstName" placeholder="First name"></div>
+          <div class="form-group"><label>Pronounce</label><input type="text" id="infoPronounceFirst" placeholder="How to say it"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Last Name</label><input type="text" id="infoLastName" placeholder="Last name"></div>
+          <div class="form-group"><label>Pronounce</label><input type="text" id="infoPronounceLast" placeholder="How to say it"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Nickname</label><input type="text" id="infoNickname" placeholder="Nickname"></div>
+          <div class="form-group"><label>Pronounce</label><input type="text" id="infoPronounceNick" placeholder="How to say it"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Date of Birth</label><input type="text" id="infoDOB" placeholder="Month Day, Year"></div>
+          <div class="form-group"><label>Phone</label><input type="text" id="infoPhone" placeholder="5551234567"><div class="hint">Numbers only</div></div>
+        </div>
+        <div class="form-group"><label>Address 1</label><input type="text" id="infoAddress1" placeholder="Street address"></div>
+        <div class="form-group"><label>Address 2</label><input type="text" id="infoAddress2" placeholder="Apt, Suite"></div>
+        <div class="form-row three">
+          <div class="form-group"><label>City</label><input type="text" id="infoCity" placeholder="City"></div>
+          <div class="form-group"><label>State</label><input type="text" id="infoState" placeholder="ST"></div>
+          <div class="form-group"><label>ZIP</label><input type="text" id="infoZip" placeholder="12345"></div>
+        </div>
+        <button class="save-btn" onclick="saveInfo()">✓ Save Information</button>
+      </div>
+      <div id="infoTab-insurance" class="tab-content">
+        <div id="insuranceList"></div>
+        <button class="add-btn" onclick="addInsurance()">+ Add Insurance</button>
+      </div>
+      <div id="infoTab-pharmacy" class="tab-content">
+        <div id="pharmacyList"></div>
+        <button class="add-btn" onclick="addPharmacy()">+ Add Pharmacy</button>
+      </div>
+      <div id="infoTab-api" class="tab-content">
+        <div class="form-group">
+          <label>ElevenLabs API Key</label>
+          <div class="api-row"><input type="password" id="apiKey" placeholder="Your key"><button onclick="saveApiKey()">Save</button></div>
+          <div id="keyStatus" class="key-status">For voice</div>
+        </div>
+        <div class="form-group" style="margin-top:16px;">
+          <label>Claude API Key</label>
+          <div class="api-row"><input type="password" id="claudeKey" placeholder="Your key"><button onclick="saveClaudeKey()">Save</button></div>
+          <div id="claudeStatus" class="key-status">For AI</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Voice Modal -->
+  <div class="modal-overlay" id="voiceModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>🎤 Voice</h3>
+        <button class="modal-close" onclick="closeVoiceModal()">×</button>
+      </div>
+      <div class="section-label">Your Voices</div>
+      <div id="specialVoices"><div class="loading-msg">Add API key</div></div>
+      <div class="section-label">All Voices</div>
+      <div class="voice-filters">
+        <button class="filter-btn active" onclick="filterVoices('all',this)">All</button>
+        <button class="filter-btn" onclick="filterVoices('female',this)">👩</button>
+        <button class="filter-btn" onclick="filterVoices('male',this)">👨</button>
+        <button class="filter-btn" onclick="filterVoices('american',this)">🇺🇸</button>
+        <button class="filter-btn" onclick="filterVoices('british',this)">🇬🇧</button>
+      </div>
+      <div class="voice-count" id="voiceCount">-</div>
+      <div class="voice-grid" id="voiceGrid"><div class="loading-msg">Add API key</div></div>
+      <div class="voice-controls">
+        <button class="test-btn" id="testBtn" onclick="toggleTest()" disabled>🔊 Test</button>
+        <div class="speed-control">
+          <label>Speed:</label>
+          <input type="range" class="speed-slider" id="speedSlider" min="0.8" max="1.2" step="0.05" value="0.95">
+          <span class="speed-value" id="speedValue">0.95x</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full Scripts Modal -->
+  <div class="modal-overlay" id="fullScriptsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>📜 Scripts</h3>
+        <button class="modal-close" onclick="closeFullScriptsModal()">×</button>
+      </div>
+      <div id="browseScriptsView">
+        <div class="script-tabs">
+          <button class="script-tab active" onclick="showScriptCategory('doctor',this)">Doctor</button>
+          <button class="script-tab" onclick="showScriptCategory('pharmacy',this)">Pharmacy</button>
+          <button class="script-tab" onclick="showScriptCategory('transport',this)">Transport</button>
+          <button class="script-tab" onclick="showScriptCategory('insurance',this)">Insurance</button>
+          <button class="script-tab" onclick="showScriptCategory('custom',this)">Custom</button>
+        </div>
+        <div id="scriptList"></div>
+        <button class="add-custom-btn" onclick="showCreateScriptView()">✏️ Add or Edit</button>
+      </div>
+      <div id="createScriptView" class="create-script-section">
+        <div class="form-group"><label>Describe</label><input type="text" id="scriptDescribe" placeholder="What you need"></div>
+        <button class="ai-generate-btn" onclick="generateScriptAI()">✨ Generate with AI</button>
+        <div class="form-group"><label>Script</label><textarea id="generatedScript" rows="4" placeholder="Type your script..."></textarea></div>
+        <div class="placeholder-help"><code>[FIRST]</code> <code>[LAST]</code> <code>[FULL_NAME]</code> <code>[DOB]</code> <code>[ADDRESS]</code> <code>[INSURANCE]</code> <code>[PHARMACY]</code></div>
+        <div class="form-row">
+          <div class="form-group"><label>Name</label><input type="text" id="newScriptName" placeholder="Script name"></div>
+          <div class="form-group"><label>Category</label><select id="newScriptCat"><option value="custom">Custom</option><option value="doctor">Doctor</option><option value="pharmacy">Pharmacy</option><option value="transport">Transport</option><option value="insurance">Insurance</option></select></div>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn cancel" onclick="hideCreateScriptView()">Cancel</button>
+          <button class="modal-btn save" onclick="saveFullScript()">✓ Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Agents Modal -->
+  <div class="modal-overlay" id="agentsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>🤖 AI Agents</h3>
+        <button class="modal-close" onclick="closeAgentsModal()">×</button>
+      </div>
+      <div class="agent-section">
+        <h4>📝 Scribe</h4>
+        <div class="agent-description">Creates summaries after calls</div>
+        <div class="setting-row"><div class="setting-info"><div class="setting-label">Auto-summarize</div></div><button class="toggle-switch active" id="toggleSum" onclick="toggleSetting('sum')"></button></div>
+        <div class="setting-row"><div class="setting-info"><div class="setting-label">Extract key info</div></div><button class="toggle-switch active" id="toggleExt" onclick="toggleSetting('ext')"></button></div>
+      </div>
+      <div class="agent-section">
+        <h4>🗣️ Smart Response</h4>
+        <div class="agent-description">Auto-answers common questions</div>
+        <div class="setting-row"><div class="setting-info"><div class="setting-label">Enable</div></div><button class="toggle-switch active" id="toggleAuto" onclick="toggleSetting('auto')"></button></div>
+        <div style="margin-top:10px;font-size:0.75rem;color:var(--text-muted);">Auto-answer:</div>
+        <div class="setting-chips">
+          <button class="setting-chip active" onclick="this.classList.toggle('active')">🎂 DOB</button>
+          <button class="setting-chip active" onclick="this.classList.toggle('active')">📱 Phone</button>
+          <button class="setting-chip active" onclick="this.classList.toggle('active')">📍 Address</button>
+          <button class="setting-chip active" onclick="this.classList.toggle('active')">🏥 Insurance</button>
+          <button class="setting-chip active" onclick="this.classList.toggle('active')">💊 Pharmacy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- My Script Modal -->
+  <div class="modal-overlay" id="myScriptModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>➕ New Script</h3>
+        <button class="modal-close" onclick="closeMyScriptModal()">×</button>
+      </div>
+      <div class="form-group"><label>Icon</label>
+        <div class="icon-picker" id="iconPicker">
+          <div class="icon-option selected" data-icon="⭐" onclick="selectIcon(this)">⭐</div>
+          <div class="icon-option" data-icon="💬" onclick="selectIcon(this)">💬</div>
+          <div class="icon-option" data-icon="📞" onclick="selectIcon(this)">📞</div>
+          <div class="icon-option" data-icon="🏥" onclick="selectIcon(this)">🏥</div>
+          <div class="icon-option" data-icon="💊" onclick="selectIcon(this)">💊</div>
+          <div class="icon-option" data-icon="🚗" onclick="selectIcon(this)">🚗</div>
+          <div class="icon-option" data-icon="😊" onclick="selectIcon(this)">😊</div>
+          <div class="icon-option" data-icon="👋" onclick="selectIcon(this)">👋</div>
+          <div class="icon-option" data-icon="❤️" onclick="selectIcon(this)">❤️</div>
+          <div class="icon-option" data-icon="🎉" onclick="selectIcon(this)">🎉</div>
+        </div>
+      </div>
+      <div class="form-group"><label>Label</label><input type="text" id="myScriptName" placeholder="Short name"></div>
+      <div class="form-group"><label>Text</label><textarea id="myScriptText" rows="3" placeholder="What Juniper says"></textarea></div>
+      <div class="form-group"><label>Show in Quick Speak?</label><select id="myScriptQuick"><option value="yes">Yes</option><option value="no">No</option></select></div>
+      <div class="modal-actions">
+        <button class="modal-btn cancel" onclick="closeMyScriptModal()">Cancel</button>
+        <button class="modal-btn save" onclick="saveMyScript()">✓ Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Insurance Modal -->
+  <div class="modal-overlay" id="addInsuranceModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>➕ Insurance</h3>
+        <button class="modal-close" onclick="closeAddInsuranceModal()">×</button>
+      </div>
+      <div class="form-group"><label>Type</label><select id="insType"><option>Medical</option><option>Dental</option><option>Vision</option><option>Medicare</option><option>Medicaid</option><option>CHIP</option><option>Pet</option><option>Other</option></select></div>
+      <div class="form-group"><label>Provider</label><input type="text" id="insProvider" placeholder="Company name"></div>
+      <div class="form-group"><label>Member ID</label><input type="text" id="insMemberId" placeholder="ID number"></div>
+      <div class="form-group"><label>Group</label><input type="text" id="insGroup" placeholder="Group number"></div>
+      <div class="form-group"><label>Phone</label><input type="text" id="insPhone" placeholder="Customer service"></div>
+      <div class="form-group"><label>RxBIN</label><input type="text" id="insRxBin" placeholder="If applicable"></div>
+      <div class="form-group"><label>RxPCN</label><input type="text" id="insRxPcn" placeholder="If applicable"></div>
+      <div class="modal-actions">
+        <button class="modal-btn cancel" onclick="closeAddInsuranceModal()">Cancel</button>
+        <button class="modal-btn save" onclick="saveInsurance()">✓ Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Pharmacy Modal -->
+  <div class="modal-overlay" id="addPharmacyModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>➕ Pharmacy</h3>
+        <button class="modal-close" onclick="closeAddPharmacyModal()">×</button>
+      </div>
+      <div class="form-group"><label>Name</label><input type="text" id="pharmName" placeholder="Pharmacy name"></div>
+      <div class="form-group"><label>Location</label><input type="text" id="pharmLocation" placeholder="Which one"></div>
+      <div class="form-group"><label>Phone</label><input type="text" id="pharmPhone" placeholder="Phone number"><div class="hint">Numbers only</div></div>
+      <div class="form-group"><label>Address</label><input type="text" id="pharmAddress" placeholder="Full address"></div>
+      <div class="form-group"><label>Primary?</label><select id="pharmPrimary"><option value="yes">Yes</option><option value="no">No</option></select></div>
+      <div class="modal-actions">
+        <button class="modal-btn cancel" onclick="closeAddPharmacyModal()">Cancel</button>
+        <button class="modal-btn save" onclick="savePharmacy()">✓ Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Button Modal -->
+  <div class="modal-overlay" id="editBtnModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="editBtnTitle">Edit Button</h3>
+        <button class="modal-close" onclick="closeEditBtnModal()">×</button>
+      </div>
+      <div class="form-group"><label>Button Label</label><input type="text" id="editBtnLabel" placeholder="Short label"></div>
+      <div class="form-group"><label>Full Text</label><textarea id="editBtnText" rows="4" placeholder="What Juniper says"></textarea></div>
+      <div class="placeholder-help">Use <code>[FIRST]</code> <code>[LAST]</code> <code>[FULL_NAME]</code></div>
+      <div class="modal-actions">
+        <button class="modal-btn cancel" onclick="closeEditBtnModal()">Cancel</button>
+        <button class="modal-btn save" onclick="saveEditBtn()">✓ Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Files -->
+  <script src="src/js/app.js"></script>
+  <script src="src/js/helpers.js"></script>
+  <script src="src/js/speech.js"></script>
+  <script src="src/js/ui.js"></script>
+  <script src="src/js/scripts.js"></script>
+  <script src="src/js/data.js"></script>
+</body>
+</html>

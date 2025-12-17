@@ -1,0 +1,160 @@
+/* Juniper v6.2.1 - Voice Modal Styles */
+
+.section-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin: 12px 0 8px;
+}
+
+.voice-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.filter-btn {
+  padding: 6px 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.filter-btn.active {
+  background: var(--accent-primary);
+  color: white;
+  border-color: var(--accent-primary);
+}
+
+.voice-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.voice-card {
+  padding: 8px 6px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.voice-card.selected {
+  border-color: var(--accent-success);
+  background: rgba(107,155,90,0.2);
+}
+
+.voice-card .voice-name {
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.voice-card .voice-meta {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.special-voice {
+  padding: 10px;
+  background: rgba(107,155,90,0.2);
+  border: 2px solid var(--accent-success);
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.special-voice.selected {
+  background: rgba(107,155,90,0.35);
+}
+
+.special-voice .voice-name {
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.special-voice .voice-meta {
+  font-size: 0.7rem;
+  color: var(--accent-success);
+  margin-top: 2px;
+}
+
+.voice-count {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.voice-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.test-btn {
+  padding: 10px 16px;
+  background: linear-gradient(135deg, var(--accent-success), #5a8a4a);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.test-btn.stop-mode {
+  background: var(--accent-danger);
+}
+
+.test-btn:disabled {
+  opacity: 0.4;
+}
+
+.speed-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 150px;
+}
+
+.speed-control label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.speed-slider {
+  flex: 1;
+  height: 4px;
+  -webkit-appearance: none;
+  background: var(--bg-input);
+  border-radius: 2px;
+}
+
+.speed-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--accent-primary);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.speed-value {
+  font-size: 0.75rem;
+  color: var(--accent-primary);
+  min-width: 35px;
+}

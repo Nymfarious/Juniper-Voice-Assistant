@@ -1,0 +1,96 @@
+/* Juniper v6.2.1 - Scripts Modal Styles */
+
+.script-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.script-tab {
+  padding: 8px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.script-tab.active {
+  background: var(--accent-primary);
+  color: white;
+}
+
+.script-item {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+.script-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.script-item-title {
+  font-weight: 600;
+  color: var(--accent-secondary);
+  font-size: 0.85rem;
+}
+
+.script-item-btn {
+  width: 30px;
+  height: 30px;
+  background: var(--bg-input);
+  border: none;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  margin-left: 4px;
+}
+
+.script-item-btn:hover {
+  color: var(--accent-primary);
+}
+
+.script-item-text {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.add-custom-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, var(--accent-warm), #8b6540);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.create-script-section {
+  display: none;
+}
+
+.create-script-section.active {
+  display: block;
+}
+
+.ai-generate-btn {
+  padding: 10px 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-accent);
+  border-radius: 8px;
+  color: var(--accent-secondary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  margin-bottom: 12px;
+}
