@@ -1,6 +1,6 @@
 # Juniper Voice Assistant
 
-A voice-activated assistant powered by AI.
+A voice-activated assistant powered by AI. Just bring your own ElevenLabs and Claude API Keys!
 
 ![Juniper Voice Assistant Interface](Screenshot.png)
 
