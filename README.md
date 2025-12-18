@@ -2,7 +2,7 @@
 
 A voice-activated assistant powered by AI.
 
-![Juniper Voice Assistant Interface](screenshot.png)
+![Juniper Voice Assistant Interface](Screenshot.png)
 
 ## Features
 
