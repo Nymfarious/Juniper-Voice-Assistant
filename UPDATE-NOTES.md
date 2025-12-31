@@ -14,10 +14,10 @@
 | Subtitle | "Your AI Voice Assistant" | "Your Voice Assistant" |
 | Speak button | "Say" | "SPEAK" |
 | Stop button | "Stop" | "STOP" |
-| Card title | "Quick Speak" | "Speak Outload" |
+| Card title | "Quick Speak" | "Speak Aloud" |
 | Toolbar button | "AI" | "Smart" |
 | Modal title | "AI Agents" | "Smart Features" |
-| Script modal | "Show in Quick Speak?" | "Show in Speak Outload?" |
+| Script modal | "Show in Quick Speak?" | "Show in Speak Aloud?" |
 | Intro text default | "...an AI voice assistant..." | "...a voice assistant..." |
 
 ### 2. Bug Fixes
@@ -88,7 +88,7 @@ src/js/data.js
 - [ ] Subtitle says "Your Voice Assistant" (no "AI")
 - [ ] SPEAK button (all caps) works
 - [ ] STOP button (all caps) works
-- [ ] "Speak Outload" card title visible
+- [ ] "Speak Aloud" card title visible
 - [ ] Hotkey buttons don't jump on hover
 - [ ] Input field is empty on page load
 - [ ] Toolbar shows "Smart" instead of "AI"

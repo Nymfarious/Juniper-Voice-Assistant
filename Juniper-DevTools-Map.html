@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌿 Juniper DevTools - App Map</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@400;600;700&display=swap');
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: linear-gradient(135deg, #0a0f0c 0%, #1a2520 50%, #0d1410 100%);
+      min-height: 100vh;
+      color: #e8f0eb;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    header {
+      text-align: center;
+      padding: 40px 20px;
+      border-bottom: 1px solid rgba(74, 159, 110, 0.3);
+      margin-bottom: 30px;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      color: #4a9f6e;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+    
+    h1 .icon {
+      font-size: 3rem;
+    }
+    
+    .subtitle {
+      color: #8fbf9f;
+      font-size: 1.1rem;
+    }
+    
+    .version {
+      display: inline-block;
+      background: rgba(74, 159, 110, 0.2);
+      border: 1px solid #4a9f6e;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      margin-top: 15px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    .nav-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .nav-tab {
+      background: rgba(74, 159, 110, 0.1);
+      border: 1px solid rgba(74, 159, 110, 0.3);
+      color: #8fbf9f;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem;
+    }
+    
+    .nav-tab:hover {
+      background: rgba(74, 159, 110, 0.2);
+      border-color: #4a9f6e;
+    }
+    
+    .nav-tab.active {
+      background: #4a9f6e;
+      color: #0a0f0c;
+      border-color: #4a9f6e;
+      font-weight: 600;
+    }
+    
+    .panel {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .panel.active {
+      display: block;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .card {
+      background: rgba(26, 37, 32, 0.8);
+      border: 1px solid rgba(74, 159, 110, 0.2);
+      border-radius: 16px;
+      padding: 25px;
+      margin-bottom: 25px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .card h2 {
+      color: #4a9f6e;
+      margin-bottom: 20px;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .mermaid-container {
+      background: rgba(10, 15, 12, 0.5);
+      border-radius: 12px;
+      padding: 20px;
+      overflow-x: auto;
+    }
+    
+    .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+    
+    /* Button Map Table */
+    .button-map {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+    
+    .button-map th {
+      background: rgba(74, 159, 110, 0.2);
+      color: #4a9f6e;
+      padding: 14px;
+      text-align: left;
+      border-bottom: 2px solid #4a9f6e;
+    }
+    
+    .button-map td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(74, 159, 110, 0.1);
+      vertical-align: top;
+    }
+    
+    .button-map tr:hover {
+      background: rgba(74, 159, 110, 0.05);
+    }
+    
+    .button-map code {
+      background: rgba(74, 159, 110, 0.15);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: #8fbf9f;
+    }
+    
+    .button-map .emoji {
+      font-size: 1.2rem;
+      margin-right: 8px;
+    }
+    
+    /* File Tree */
+    .file-tree {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      line-height: 1.8;
+      background: rgba(10, 15, 12, 0.5);
+      padding: 20px;
+      border-radius: 12px;
+    }
+    
+    .file-tree .folder {
+      color: #4a9f6e;
+    }
+    
+    .file-tree .file {
+      color: #8fbf9f;
+    }
+    
+    .file-tree .comment {
+      color: #5a6b5f;
+      margin-left: 10px;
+    }
+    
+    /* Roadmap */
+    .roadmap-phase {
+      background: rgba(10, 15, 12, 0.5);
+      border-left: 4px solid #4a9f6e;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 0 12px 12px 0;
+    }
+    
+    .roadmap-phase h3 {
+      color: #4a9f6e;
+      margin-bottom: 15px;
+      font-size: 1.1rem;
+    }
+    
+    .roadmap-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      color: #b8c8bd;
+    }
+    
+    .roadmap-item .checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #4a9f6e;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .roadmap-item.done .checkbox {
+      background: #4a9f6e;
+    }
+    
+    .roadmap-item.done .checkbox::after {
+      content: '✓';
+      color: #0a0f0c;
+      font-weight: bold;
+    }
+    
+    /* State Structure */
+    .state-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      background: rgba(10, 15, 12, 0.5);
+      padding: 20px;
+      border-radius: 12px;
+      overflow-x: auto;
+      white-space: pre;
+    }
+    
+    .state-code .key {
+      color: #4a9f6e;
+    }
+    
+    .state-code .comment {
+      color: #5a6b5f;
+    }
+    
+    .state-code .string {
+      color: #e8a87c;
+    }
+    
+    .state-code .bracket {
+      color: #8fbf9f;
+    }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(74, 159, 110, 0.2);
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      color: #8fbf9f;
+    }
+    
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+    }
+    
+    .legend-color.main { background: #2d5e3f; border: 1px solid #4a9f6e; }
+    .legend-color.modal { background: #1a3a25; border: 1px solid #6b8f7a; }
+    .legend-color.action { background: #4a9f6e; }
+
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: #5a6b5f;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><span class="icon">🌿</span> Juniper DevTools</h1>
+      <p class="subtitle">Master App Map & Development Guide</p>
+      <span class="version">v6.2.1</span>
+    </header>
+    
+    <nav class="nav-tabs">
+      <button class="nav-tab active" onclick="showPanel('flowchart')">📊 Flowchart</button>
+      <button class="nav-tab" onclick="showPanel('buttons')">🔘 Button Map</button>
+      <button class="nav-tab" onclick="showPanel('files')">📁 Files</button>
+      <button class="nav-tab" onclick="showPanel('state')">💾 State</button>
+      <button class="nav-tab" onclick="showPanel('roadmap')">🚀 Roadmap</button>
+    </nav>
+    
+    <!-- Flowchart Panel -->
+    <div id="flowchart" class="panel active">
+      <div class="card">
+        <h2>📊 App Architecture Flowchart</h2>
+        <div class="mermaid-container">
+          <pre class="mermaid">
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#4a9f6e', 'primaryTextColor': '#fff', 'primaryBorderColor': '#2d5e3f', 'lineColor': '#6b8f7a', 'secondaryColor': '#2a3f30', 'tertiaryColor': '#1a2520'}}}%%
+flowchart TB
+    subgraph MAIN["🌿 MAIN SCREEN"]
+        HEADER["📱 Header"]
+        TYPE["💬 Type Anything"]
+        QUICK["📞 Quick Speak"]
+        SCRIPTS["⭐ My Scripts"]
+        HIST["📜 History"]
+    end
+    
+    subgraph QUICKSPEAK["Quick Speak Details"]
+        INTRO["🌿 Intro Button"]
+        VERIFY["🎤 Verify Button"]
+        TABS["Tabs: Common | Info | Calls"]
+        TOOLBAR["Toolbar: Scripts | AI | Voice | Info"]
+    end
+    
+    subgraph MODALS["📋 MODALS"]
+        INFO["⚙️ Info Modal"]
+        VOICE["🎤 Voice Modal"]
+        SCRIPTS_M["📜 Scripts Modal"]
+        AI["🤖 AI Modal"]
+        MYSCRIPT["My Script Modal"]
+        EDITBTN["Edit Button Modal"]
+        INSURANCE["Insurance Modal"]
+        PHARMACY["Pharmacy Modal"]
+    end
+    
+    HEADER --> TYPE --> QUICK --> SCRIPTS --> HIST
+    QUICK --> QUICKSPEAK
+    
+    TOOLBAR -->|"📜"| SCRIPTS_M
+    TOOLBAR -->|"🤖"| AI
+    TOOLBAR -->|"🎤"| VOICE
+    TOOLBAR -->|"⚙️"| INFO
+    
+    INTRO -->|"✏️"| EDITBTN
+    VERIFY -->|"✏️"| EDITBTN
+    SCRIPTS -->|"+ New"| MYSCRIPT
+    INFO -->|"+ Insurance"| INSURANCE
+    INFO -->|"+ Pharmacy"| PHARMACY
+          </pre>
+        </div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-color main"></div> Main Cards</div>
+          <div class="legend-item"><div class="legend-color modal"></div> Modals</div>
+          <div class="legend-item"><div class="legend-color action"></div> Actions</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Button Map Panel -->
+    <div id="buttons" class="panel">
+      <div class="card">
+        <h2>🔘 Button → Panel → Function Map</h2>
+        <table class="button-map">
+          <thead>
+            <tr>
+              <th>Button</th>
+              <th>Location</th>
+              <th>Opens/Calls</th>
+              <th>Function</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="emoji">📜</span>Scripts</td>
+              <td>Toolbar</td>
+              <td>Full Scripts Modal</td>
+              <td><code>openFullScriptsModal()</code></td>
+            </tr>
+            <tr>
+              <td><span class="emoji">🤖</span>AI</td>
+              <td>Toolbar</td>
+              <td>AI Agents Modal</td>
+              <td><code>openAgentsModal()</code></td>
+            </tr>
+            <tr>
+              <td><span class="emoji">🎤</span>Voice</td>
+              <td>Toolbar</td>
+              <td>Voice Modal</td>
+              <td><code>openVoiceModal()</code></td>
+            </tr>
+            <tr>
+              <td><span class="emoji">⚙️</span>Info</td>
+              <td>Toolbar</td>
+              <td>Info Modal</td>
+              <td><code>openInfoModal()</code></td>
+            </tr>
+            <tr>
+              <td><span class="emoji">🌿</span>Intro</td>
+              <td>Quick Speak</td>
+              <td>Speaks intro text</td>
+              <td><code>speakIntro()</code></td>
+            </tr>
+            <tr>
+              <td><span class="emoji">✏️</span>Edit (Intro)</td>
+              <td>Next to Intro</td>
+              <td>Edit Button Modal</td>
+              <td><code>editIntroBtn()</code></td>
+            </tr>
+            <tr>
+              <td><span class="emoji">🎤</span>Verify</td>
+              <td>Quick Speak</td>
+              <td>Speaks verify text</td>
+              <td><code>speakVerify()</code></td>
+            </tr>
+            <tr>
+              <td><span class="emoji">✏️</span>Edit (Verify)</td>
+              <td>Next to Verify</td>
+              <td>Edit Button Modal</td>
+              <td><code>editVerifyBtn()</code></td>
+            </tr>
+            <tr>
+              <td><span class="emoji">➕</span>+ New</td>
+              <td>My Scripts Card</td>
+              <td>My Script Modal</td>
+              <td><code>openMyScriptModal()</code></td>
+            </tr>
+            <tr>
+              <td><span class="emoji">✓</span>Yes</td>
+              <td>Common Tab</td>
+              <td>Speaks "Yes, that is correct."</td>
+              <td><code>speak(msg)</code></td>
+            </tr>
+            <tr>
+              <td><span class="emoji">👤</span>Name</td>
+              <td>My Info Tab</td>
+              <td>Speaks full name</td>
+              <td><code>speakInfo('name')</code></td>
+            </tr>
+            <tr>
+              <td><span class="emoji">🔊</span>Test</td>
+              <td>Voice Modal</td>
+              <td>Tests selected voice</td>
+              <td><code>toggleTest()</code></td>
+            </tr>
+            <tr>
+              <td><span class="emoji">✨</span>Generate with AI</td>
+              <td>Scripts Modal</td>
+              <td>Claude API call</td>
+              <td><code>generateScriptAI()</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Files Panel -->
+    <div id="files" class="panel">
+      <div class="card">
+        <h2>📁 File Structure</h2>
+        <div class="file-tree">
+<span class="folder">Juniper-Voice-Assistant/</span>
+├── <span class="file">index.html</span><span class="comment">← Main app entry</span>
+├── <span class="file">juniper-v6.2.1.html</span><span class="comment">← Legacy single-file</span>
+├── <span class="folder">src/</span>
+│   ├── <span class="folder">css/</span>
+│   │   ├── <span class="file">styles.css</span><span class="comment">← Main styles, layout</span>
+│   │   ├── <span class="file">modals.css</span><span class="comment">← All modal styling</span>
+│   │   ├── <span class="file">voice.css</span><span class="comment">← Voice picker UI</span>
+│   │   ├── <span class="file">scripts.css</span><span class="comment">← Scripts card styles</span>
+│   │   └── <span class="file">agents.css</span><span class="comment">← AI agents modal</span>
+│   └── <span class="folder">js/</span>
+│       ├── <span class="file">app.js</span><span class="comment">← State & init()</span>
+│       ├── <span class="file">helpers.js</span><span class="comment">← Name helpers, placeholders</span>
+│       ├── <span class="file">speech.js</span><span class="comment">← speak(), loadVoices()</span>
+│       ├── <span class="file">ui.js</span><span class="comment">← Modal controls, tabs</span>
+│       ├── <span class="file">scripts.js</span><span class="comment">← History, My Scripts</span>
+│       └── <span class="file">data.js</span><span class="comment">← Insurance, Pharmacy CRUD</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- State Panel -->
+    <div id="state" class="panel">
+      <div class="card">
+        <h2>💾 State Structure</h2>
+        <div class="state-code"><span class="key">state</span> <span class="bracket">=</span> <span class="bracket">{</span>
+  <span class="comment">// API Keys</span>
+  <span class="key">apiKey</span>: <span class="string">''</span>,              <span class="comment">// ElevenLabs</span>
+  <span class="key">claudeKey</span>: <span class="string">''</span>,           <span class="comment">// Anthropic Claude</span>
+  
+  <span class="comment">// Voice</span>
+  <span class="key">allVoices</span>: [],           <span class="comment">// All ElevenLabs voices</span>
+  <span class="key">specialVoices</span>: [],       <span class="comment">// Robin's cloned voices</span>
+  <span class="key">selectedVoiceId</span>: <span class="string">''</span>,
+  <span class="key">speechSpeed</span>: 0.95,
+  
+  <span class="comment">// User Info</span>
+  <span class="key">info</span>: <span class="bracket">{</span>
+    firstName, lastName, nickname,
+    pronounceFirst, pronounceLast, pronounceNick,
+    dob, phone, address1, address2, city, state, zip
+  <span class="bracket">}</span>,
+  <span class="key">insurances</span>: [],
+  <span class="key">pharmacies</span>: [],
+  
+  <span class="comment">// Scripts</span>
+  <span class="key">history</span>: [],             <span class="comment">// Recent spoken phrases</span>
+  <span class="key">myScripts</span>: [],           <span class="comment">// User's custom scripts</span>
+  <span class="key">fullScripts</span>: <span class="bracket">{</span>
+    doctor: [], pharmacy: [], transport: [],
+    insurance: [], custom: []
+  <span class="bracket">}</span>,
+  
+  <span class="comment">// UI State</span>
+  <span class="key">introText</span>: <span class="string">"Hello, I'm Juniper..."</span>,
+  <span class="key">verifyText</span>: <span class="string">"I'll let [FIRST] verify..."</span>
+<span class="bracket">}</span></div>
+      </div>
+    </div>
+    
+    <!-- Roadmap Panel -->
+    <div id="roadmap" class="panel">
+      <div class="card">
+        <h2>🚀 Robin's Feature Roadmap</h2>
+        
+        <div class="roadmap-phase">
+          <h3>Phase 1: Core App Separation</h3>
+          <div class="roadmap-item"><div class="checkbox"></div> Create Robin-specific build</div>
+          <div class="roadmap-item"><div class="checkbox"></div> Lock API key to Robin's voice only</div>
+          <div class="roadmap-item"><div class="checkbox"></div> Demo mode with limited usage</div>
+        </div>
+        
+        <div class="roadmap-phase">
+          <h3>Phase 2: Twilio Phone Integration</h3>
+          <div class="roadmap-item"><div class="checkbox"></div> Add Twilio API key field</div>
+          <div class="roadmap-item"><div class="checkbox"></div> Add phone number configuration</div>
+          <div class="roadmap-item"><div class="checkbox"></div> "Send to Twilio" hold button</div>
+          <div class="roadmap-item"><div class="checkbox"></div> Hold music selection</div>
+        </div>
+        
+        <div class="roadmap-phase">
+          <h3>Phase 3: Recording Features</h3>
+          <div class="roadmap-item"><div class="checkbox"></div> Listen in Private mode</div>
+          <div class="roadmap-item"><div class="checkbox"></div> Caller transcription display</div>
+          <div class="roadmap-item"><div class="checkbox"></div> Auto-record triggers (doctors, test results)</div>
+        </div>
+        
+        <div class="roadmap-phase">
+          <h3>Phase 4: Custom Scripts UX</h3>
+          <div class="roadmap-item"><div class="checkbox"></div> HOW TO guide for Robin</div>
+          <div class="roadmap-item"><div class="checkbox"></div> 3 Quick Buttons with icon picker</div>
+          <div class="roadmap-item"><div class="checkbox"></div> Script preview before save</div>
+        </div>
+        
+        <div class="roadmap-phase">
+          <h3>Phase 5: Phone Integration</h3>
+          <div class="roadmap-item"><div class="checkbox"></div> Use phone's mic/speaker</div>
+          <div class="roadmap-item"><div class="checkbox"></div> Call routing options</div>
+          <div class="roadmap-item"><div class="checkbox"></div> Conference capability</div>
+        </div>
+        
+        <div class="roadmap-phase">
+          <h3>Phase 6: DevTools Panel</h3>
+          <div class="roadmap-item"><div class="checkbox"></div> Right-slide DevTools drawer</div>
+          <div class="roadmap-item"><div class="checkbox"></div> Live app map view</div>
+          <div class="roadmap-item"><div class="checkbox"></div> State inspector</div>
+        </div>
+      </div>
+    </div>
+    
+    <footer>
+      🌿 Juniper Voice Assistant - Giving Robin her voice back<br>
+      Generated: December 25, 2025
+    </footer>
+  </div>
+  
+  <script>
+    mermaid.initialize({ 
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        primaryColor: '#4a9f6e',
+        primaryTextColor: '#ffffff',
+        primaryBorderColor: '#2d5e3f',
+        lineColor: '#6b8f7a',
+        secondaryColor: '#2a3f30',
+        tertiaryColor: '#1a2520',
+        background: '#0a0f0c'
+      }
+    });
+    
+    function showPanel(id) {
+      // Hide all panels
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      
+      // Show selected
+      document.getElementById(id).classList.add('active');
+      event.target.classList.add('active');
+    }
+  </script>
+</body>
+</html>
