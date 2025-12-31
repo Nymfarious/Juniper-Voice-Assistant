@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Juniper">
+  <title>Juniper - Robin's Voice Assistant</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #2d3436 0%, #636e72 100%);
+      min-height: 100vh;
+      padding: 12px;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 16px;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    header p {
+      opacity: 0.7;
+      font-size: 0.95rem;
+    }
+
+    .juniper-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #00b894, #00cec9);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+
+    /* Cards */
+    .card {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      margin-bottom: 12px;
+      opacity: 0.9;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Setup Card */
+    .setup-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .setup-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .setup-row label {
+      min-width: 80px;
+      font-size: 0.85rem;
+      opacity: 0.8;
+      display: flex;
+      align-items: center;
+    }
+
+    .setup-row input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.15);
+      color: white;
+      font-size: 0.95rem;
+    }
+
+    .setup-row input::placeholder {
+      color: rgba(255,255,255,0.5);
+    }
+
+    .setup-row input:focus {
+      outline: none;
+      background: rgba(255,255,255,0.25);
+    }
+
+    .save-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #00b894, #00cec9);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    .save-btn:hover {
+      opacity: 0.9;
+    }
+
+    /* Collapsible */
+    .collapse-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .collapse-header .arrow {
+      transition: transform 0.3s;
+    }
+
+    .collapse-header.collapsed .arrow {
+      transform: rotate(-90deg);
+    }
+
+    .collapse-content {
+      overflow: hidden;
+      max-height: 1000px;
+      transition: max-height 0.3s;
+    }
+
+    .collapse-content.collapsed {
+      max-height: 0;
+    }
+
+    /* Voice Selection Mini */
+    .voice-mini {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .voice-mini select {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.15);
+      color: white;
+      font-size: 0.9rem;
+      min-width: 150px;
+    }
+
+    .voice-mini select option {
+      background: #2d3436;
+      color: white;
+    }
+
+    .voice-mini button {
+      padding: 10px 16px;
+      background: rgba(255,255,255,0.2);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+    }
+
+    /* Transcript Display */
+    .transcript-box {
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      padding: 14px;
+      min-height: 80px;
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 1.1rem;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .transcript-box .them {
+      color: #74b9ff;
+    }
+
+    .transcript-box .juniper {
+      color: #00cec9;
+    }
+
+    .transcript-box .placeholder {
+      opacity: 0.5;
+      font-style: italic;
+    }
+
+    /* Hotkey Grid */
+    .hotkey-section {
+      margin-bottom: 12px;
+    }
+
+    .hotkey-label {
+      font-size: 0.8rem;
+      opacity: 0.6;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .hotkey-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .hotkey-btn {
+      padding: 14px 10px;
+      background: rgba(255,255,255,0.1);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      color: white;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .hotkey-btn:hover {
+      background: rgba(255,255,255,0.2);
+      border-color: rgba(255,255,255,0.4);
+    }
+
+    .hotkey-btn:active {
+      transform: scale(0.98);
+    }
+
+    .hotkey-btn.speaking {
+      background: linear-gradient(135deg, #00b894, #00cec9);
+      border-color: #00b894;
+    }
+
+    .hotkey-btn.intro {
+      background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+      border-color: #6c5ce7;
+      grid-column: span 2;
+      font-size: 1rem;
+      padding: 16px;
+    }
+
+    .hotkey-btn.yes {
+      background: rgba(0, 184, 148, 0.3);
+      border-color: #00b894;
+    }
+
+    .hotkey-btn.no {
+      background: rgba(214, 48, 49, 0.3);
+      border-color: #d63031;
+    }
+
+    .hotkey-btn.transfer {
+      background: rgba(253, 203, 110, 0.3);
+      border-color: #fdcb6e;
+      grid-column: span 2;
+    }
+
+    /* Custom Input */
+    .custom-input-section {
+      margin-top: 12px;
+    }
+
+    .custom-input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .custom-input {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.15);
+      color: white;
+      font-size: 1rem;
+    }
+
+    .custom-input::placeholder {
+      color: rgba(255,255,255,0.5);
+    }
+
+    .custom-input:focus {
+      outline: none;
+      background: rgba(255,255,255,0.25);
+    }
+
+    .send-btn {
+      padding: 14px 24px;
+      background: linear-gradient(135deg, #00b894, #00cec9);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .send-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Status Bar */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 10px;
+      margin-top: 12px;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #00b894;
+    }
+
+    .status-dot.speaking {
+      background: #0984e3;
+      animation: pulse 1s infinite;
+    }
+
+    .status-dot.loading {
+      background: #fdcb6e;
+      animation: pulse 0.5s infinite;
+    }
+
+    .status-dot.error {
+      background: #d63031;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.2); }
+    }
+
+    .status-text {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    /* Stop Button */
+    .stop-btn {
+      padding: 10px 20px;
+      background: #d63031;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      margin-left: auto;
+    }
+
+    /* Call Script Preview */
+    .script-preview {
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 0.85rem;
+      margin-top: 10px;
+      max-height: 100px;
+      overflow-y: auto;
+      line-height: 1.4;
+    }
+
+    .script-preview .label {
+      color: #00cec9;
+      font-weight: 600;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      font-size: 0.85rem;
+      opacity: 0.7;
+    }
+
+    .tab.active {
+      background: rgba(255,255,255,0.25);
+      opacity: 1;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Privacy notice */
+    .privacy-notice {
+      font-size: 0.75rem;
+      opacity: 0.5;
+      text-align: center;
+      margin-top: 16px;
+      padding: 10px;
+    }
+
+    /* API Key section */
+    .api-section {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .api-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .api-row input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.15);
+      color: white;
+      font-size: 0.9rem;
+    }
+
+    .api-row button {
+      padding: 10px 16px;
+      background: #00b894;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .key-status {
+      font-size: 0.8rem;
+      margin-top: 6px;
+      opacity: 0.7;
+    }
+
+    .key-status.saved {
+      color: #00b894;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>
+        <div class="juniper-icon">🌿</div>
+        Juniper
+      </h1>
+      <p>Robin's AI Voice Assistant</p>
+    </header>
+
+    <!-- Setup Card (Collapsible) -->
+    <div class="card">
+      <div class="collapse-header" onclick="toggleCollapse('setup')">
+        <h2>⚙️ My Information</h2>
+        <span class="arrow">▼</span>
+      </div>
+      <div id="setup-content" class="collapse-content">
+        <div class="setup-grid">
+          <div class="setup-row">
+            <label>Name</label>
+            <input type="text" id="infoName" placeholder="Robin">
+          </div>
+          <div class="setup-row">
+            <label>DOB</label>
+            <input type="text" id="infoDOB" placeholder="January 15, 1970">
+          </div>
+          <div class="setup-row">
+            <label>Phone</label>
+            <input type="text" id="infoPhone" placeholder="(555) 123-4567">
+          </div>
+          <div class="setup-row">
+            <label>Address</label>
+            <input type="text" id="infoAddress" placeholder="123 Main St, City, State">
+          </div>
+          <div class="setup-row">
+            <label>Insurance</label>
+            <input type="text" id="infoInsurance" placeholder="Blue Cross #12345">
+          </div>
+          <div class="setup-row">
+            <label>Pharmacy</label>
+            <input type="text" id="infoPharmacy" placeholder="Walgreens on Main">
+          </div>
+          <button class="save-btn" onclick="saveInfo()">💾 Save My Information</button>
+        </div>
+
+        <div class="api-section">
+          <div class="api-row">
+            <input type="password" id="apiKey" placeholder="ElevenLabs API Key">
+            <button onclick="saveApiKey()">Save</button>
+          </div>
+          <div id="keyStatus" class="key-status">Add API key for voice</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Voice Selection -->
+    <div class="card">
+      <div class="collapse-header" onclick="toggleCollapse('voice')">
+        <h2>🎤 Juniper's Voice</h2>
+        <span class="arrow">▼</span>
+      </div>
+      <div id="voice-content" class="collapse-content collapsed">
+        <div class="voice-mini">
+          <select id="voiceSelect">
+            <option value="">Loading voices...</option>
+          </select>
+          <button onclick="testVoice()">🔊 Test</button>
+        </div>
+        <div class="setup-row" style="margin-top: 10px;">
+          <label>Speed</label>
+          <input type="range" id="speedSlider" min="0.8" max="1.2" step="0.05" value="0.95" style="flex:1">
+          <span id="speedValue" style="min-width:45px;text-align:right">0.95x</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Call Interface -->
+    <div class="card">
+      <h2>📞 Call Assistant</h2>
+      
+      <!-- Transcript -->
+      <div class="transcript-box" id="transcript">
+        <span class="placeholder">Juniper will speak for you. Tap the introduction button to start a call.</span>
+      </div>
+
+      <!-- Introduction Button -->
+      <button class="hotkey-btn intro" onclick="speakIntro()">
+        🌿 "Hello, I'm Juniper, Robin's assistant..."
+      </button>
+
+      <!-- Hotkey Tabs -->
+      <div class="tabs">
+        <button class="tab active" onclick="showTab('common')">Common</button>
+        <button class="tab" onclick="showTab('info')">My Info</button>
+        <button class="tab" onclick="showTab('responses')">Responses</button>
+      </div>
+
+      <!-- Common Tab -->
+      <div id="tab-common" class="tab-content active">
+        <div class="hotkey-grid">
+          <button class="hotkey-btn yes" onclick="speak('Yes, that\\'s correct.')">✓ Yes</button>
+          <button class="hotkey-btn no" onclick="speak('No, that\\'s not correct.')">✗ No</button>
+          <button class="hotkey-btn" onclick="speak('Could you please repeat that?')">🔄 Repeat that?</button>
+          <button class="hotkey-btn" onclick="speak('One moment please, let me check.')">⏳ One moment</button>
+          <button class="hotkey-btn" onclick="speak('Could you speak a little slower please?')">🐢 Slower please</button>
+          <button class="hotkey-btn" onclick="speak('Thank you very much for your help.')">🙏 Thank you</button>
+        </div>
+      </div>
+
+      <!-- My Info Tab -->
+      <div id="tab-info" class="tab-content">
+        <div class="hotkey-grid">
+          <button class="hotkey-btn" onclick="speakInfo('name')">👤 My Name</button>
+          <button class="hotkey-btn" onclick="speakInfo('dob')">🎂 My DOB</button>
+          <button class="hotkey-btn" onclick="speakInfo('phone')">📱 My Phone</button>
+          <button class="hotkey-btn" onclick="speakInfo('address')">📍 My Address</button>
+          <button class="hotkey-btn" onclick="speakInfo('insurance')">🏥 Insurance</button>
+          <button class="hotkey-btn" onclick="speakInfo('pharmacy')">💊 Pharmacy</button>
+        </div>
+      </div>
+
+      <!-- Responses Tab -->
+      <div id="tab-responses" class="tab-content">
+        <div class="hotkey-grid">
+          <button class="hotkey-btn" onclick="speak('I\\'m calling to schedule an appointment.')">📅 Schedule appt</button>
+          <button class="hotkey-btn" onclick="speak('I\\'m calling to refill a prescription.')">💊 Refill Rx</button>
+          <button class="hotkey-btn" onclick="speak('I\\'m calling about my test results.')">📋 Test results</button>
+          <button class="hotkey-btn" onclick="speak('I need to reschedule my appointment.')">🔄 Reschedule</button>
+          <button class="hotkey-btn" onclick="speak('I have a question about my bill.')">💰 Billing question</button>
+          <button class="hotkey-btn" onclick="speak('I need to speak with a nurse please.')">👩‍⚕️ Speak to nurse</button>
+        </div>
+      </div>
+
+      <!-- Transfer to Robin -->
+      <button class="hotkey-btn transfer" onclick="speakTransfer()">
+        🎤 "Robin will verify that directly..."
+      </button>
+
+      <!-- Custom Input -->
+      <div class="custom-input-section">
+        <div class="custom-input-row">
+          <input type="text" class="custom-input" id="customText" placeholder="Type anything for Juniper to say...">
+          <button class="send-btn" id="sendBtn" onclick="speakCustom()">Say</button>
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div class="status-bar">
+        <div class="status-dot" id="statusDot"></div>
+        <span class="status-text" id="statusText">Ready</span>
+        <button class="stop-btn" onclick="stopSpeaking()">Stop</button>
+      </div>
+    </div>
+
+    <!-- Script Preview -->
+    <div class="card">
+      <div class="collapse-header" onclick="toggleCollapse('scripts')">
+        <h2>📜 Full Scripts</h2>
+        <span class="arrow">▼</span>
+      </div>
+      <div id="scripts-content" class="collapse-content collapsed">
+        <div class="tabs">
+          <button class="tab active" onclick="showScriptTab('doctor')">Doctor</button>
+          <button class="tab" onclick="showScriptTab('pharmacy')">Pharmacy</button>
+          <button class="tab" onclick="showScriptTab('transport')">Transport</button>
+        </div>
+        
+        <div id="script-doctor" class="script-preview">
+          <span class="label">Doctor Appointment:</span><br>
+          Hello, I'm Juniper, an AI voice assistant calling on behalf of Robin. Robin can hear everything but uses me to communicate. We're calling to schedule an appointment with [doctor]. Robin is available [days/times]. Her date of birth is [DOB].
+        </div>
+        <div id="script-pharmacy" class="script-preview" style="display:none;">
+          <span class="label">Pharmacy Refill:</span><br>
+          Hello, I'm Juniper, an AI voice assistant calling on behalf of Robin. We're calling to refill a prescription. Robin's date of birth is [DOB]. The medication is [name] and the prescription number is [number].
+        </div>
+        <div id="script-transport" class="script-preview" style="display:none;">
+          <span class="label">Transportation:</span><br>
+          Hello, I'm Juniper, an AI voice assistant calling on behalf of Robin. We need to schedule a ride for [date] at [time]. Pickup at [address], going to [destination]. Robin will need a return trip around [time].
+        </div>
+        
+        <button class="hotkey-btn" style="width:100%; margin-top:10px;" onclick="speakFullScript()">
+          🔊 Speak Current Script
+        </button>
+      </div>
+    </div>
+
+    <div class="privacy-notice">
+      🔒 All information stored locally on your device only.<br>
+      Juniper helps Robin communicate - nothing is shared.
+    </div>
+  </div>
+
+  <script>
+    // ============================================
+    // STATE
+    // ============================================
+    let apiKey = localStorage.getItem('juniperApiKey') || '';
+    let voices = [];
+    let selectedVoiceId = localStorage.getItem('juniperVoiceId') || '';
+    let speechSpeed = parseFloat(localStorage.getItem('juniperSpeed') || '0.95');
+    let currentAudio = null;
+    let info = JSON.parse(localStorage.getItem('juniperInfo') || '{}');
+    let currentScriptTab = 'doctor';
+
+    // ============================================
+    // INIT
+    // ============================================
+    window.addEventListener('load', () => {
+      // Load saved info
+      document.getElementById('infoName').value = info.name || '';
+      document.getElementById('infoDOB').value = info.dob || '';
+      document.getElementById('infoPhone').value = info.phone || '';
+      document.getElementById('infoAddress').value = info.address || '';
+      document.getElementById('infoInsurance').value = info.insurance || '';
+      document.getElementById('infoPharmacy').value = info.pharmacy || '';
+      
+      // Load API key
+      if (apiKey) {
+        document.getElementById('apiKey').value = '••••••••••';
+        document.getElementById('keyStatus').textContent = '✓ API key saved';
+        document.getElementById('keyStatus').className = 'key-status saved';
+        loadVoices();
+      }
+
+      // Speed slider
+      document.getElementById('speedSlider').value = speechSpeed;
+      document.getElementById('speedValue').textContent = speechSpeed.toFixed(2) + 'x';
+      document.getElementById('speedSlider').addEventListener('input', (e) => {
+        speechSpeed = parseFloat(e.target.value);
+        document.getElementById('speedValue').textContent = speechSpeed.toFixed(2) + 'x';
+        localStorage.setItem('juniperSpeed', speechSpeed);
+      });
+
+      // Enter key for custom input
+      document.getElementById('customText').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') speakCustom();
+      });
+
+      // Collapse setup if info exists
+      if (info.name && apiKey) {
+        toggleCollapse('setup');
+      }
+    });
+
+    // ============================================
+    // COLLAPSE
+    // ============================================
+    function toggleCollapse(section) {
+      const content = document.getElementById(section + '-content');
+      const header = content.previousElementSibling;
+      content.classList.toggle('collapsed');
+      header.classList.toggle('collapsed');
+    }
+
+    // ============================================
+    // TABS
+    // ============================================
+    function showTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    function showScriptTab(tab) {
+      currentScriptTab = tab;
+      document.querySelectorAll('.script-preview').forEach(s => s.style.display = 'none');
+      document.getElementById('script-' + tab).style.display = 'block';
+      
+      // Update tab buttons
+      const tabs = event.target.parentElement.querySelectorAll('.tab');
+      tabs.forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    // ============================================
+    // SAVE INFO
+    // ============================================
+    function saveInfo() {
+      info = {
+        name: document.getElementById('infoName').value.trim() || 'Robin',
+        dob: document.getElementById('infoDOB').value.trim(),
+        phone: document.getElementById('infoPhone').value.trim(),
+        address: document.getElementById('infoAddress').value.trim(),
+        insurance: document.getElementById('infoInsurance').value.trim(),
+        pharmacy: document.getElementById('infoPharmacy').value.trim()
+      };
+      localStorage.setItem('juniperInfo', JSON.stringify(info));
+      setStatus('ready', 'Information saved!');
+      
+      // Update script previews
+      updateScriptPreviews();
+    }
+
+    function updateScriptPreviews() {
+      document.getElementById('script-doctor').innerHTML = `
+        <span class="label">Doctor Appointment:</span><br>
+        Hello, I'm Juniper, an AI voice assistant calling on behalf of ${info.name || '[name]'}. ${info.name || 'Robin'} can hear everything but uses me to communicate. We're calling to schedule an appointment. ${info.name || 'Robin'}'s date of birth is ${info.dob || '[DOB]'}.
+      `;
+      document.getElementById('script-pharmacy').innerHTML = `
+        <span class="label">Pharmacy Refill:</span><br>
+        Hello, I'm Juniper, an AI voice assistant calling on behalf of ${info.name || '[name]'}. We're calling to refill a prescription. ${info.name || 'Robin'}'s date of birth is ${info.dob || '[DOB]'}. The pharmacy is ${info.pharmacy || '[pharmacy]'}.
+      `;
+      document.getElementById('script-transport').innerHTML = `
+        <span class="label">Transportation:</span><br>
+        Hello, I'm Juniper, an AI voice assistant calling on behalf of ${info.name || '[name]'}. We need to schedule a ride. Pickup at ${info.address || '[address]'}.
+      `;
+    }
+
+    function saveApiKey() {
+      const key = document.getElementById('apiKey').value.trim();
+      if (key && !key.includes('•')) {
+        apiKey = key;
+        localStorage.setItem('juniperApiKey', key);
+        document.getElementById('apiKey').value = '••••••••••';
+        document.getElementById('keyStatus').textContent = '✓ API key saved';
+        document.getElementById('keyStatus').className = 'key-status saved';
+        loadVoices();
+      }
+    }
+
+    // ============================================
+    // VOICES
+    // ============================================
+    async function loadVoices() {
+      try {
+        const response = await fetch('https://api.elevenlabs.io/v1/voices', {
+          headers: { 'xi-api-key': apiKey }
+        });
+        const data = await response.json();
+        voices = data.voices || [];
+        
+        const select = document.getElementById('voiceSelect');
+        select.innerHTML = voices.map(v => 
+          `<option value="${v.voice_id}" ${v.voice_id === selectedVoiceId ? 'selected' : ''}>${v.name}</option>`
+        ).join('');
+
+        // Select first voice if none selected
+        if (!selectedVoiceId && voices.length > 0) {
+          selectedVoiceId = voices[0].voice_id;
+        }
+
+        select.addEventListener('change', (e) => {
+          selectedVoiceId = e.target.value;
+          localStorage.setItem('juniperVoiceId', selectedVoiceId);
+        });
+
+      } catch (error) {
+        console.error('Error loading voices:', error);
+      }
+    }
+
+    function testVoice() {
+      speak(`Hello ${info.name || 'Robin'}! I'm Juniper, and I'll be speaking for you today. How does my voice sound?`);
+    }
+
+    // ============================================
+    // SPEAK FUNCTIONS
+    // ============================================
+    async function speak(text) {
+      if (!apiKey || !selectedVoiceId) {
+        alert('Please add your API key and select a voice first');
+        return;
+      }
+
+      stopSpeaking();
+      setStatus('loading', 'Speaking...');
+      addToTranscript('juniper', text);
+
+      try {
+        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'audio/mpeg',
+            'Content-Type': 'application/json',
+            'xi-api-key': apiKey
+          },
+          body: JSON.stringify({
+            text: text,
+            model_id: 'eleven_monolingual_v1',
+            voice_settings: { stability: 0.5, similarity_boost: 0.75 }
+          })
+        });
+
+        if (!response.ok) throw new Error('API error');
+
+        const blob = await response.blob();
+        currentAudio = new Audio(URL.createObjectURL(blob));
+        currentAudio.playbackRate = speechSpeed;
+
+        currentAudio.onplay = () => setStatus('speaking', 'Juniper is speaking...');
+        currentAudio.onended = () => setStatus('ready', 'Ready');
+
+        await currentAudio.play();
+
+      } catch (error) {
+        console.error(error);
+        setStatus('error', 'Error speaking');
+      }
+    }
+
+    function speakIntro() {
+      const name = info.name || 'Robin';
+      const intro = `Hello, my name is Juniper. I'm an AI voice assistant calling on behalf of ${name}. ${name} can hear everything you say, but uses me to communicate. Please speak at a normal pace, and I'll relay everything to ${name}. How may I help you today?`;
+      speak(intro);
+    }
+
+    function speakTransfer() {
+      const name = info.name || 'Robin';
+      speak(`I'll let ${name} verify that information directly. ${name}, go ahead whenever you're ready.`);
+    }
+
+    function speakInfo(type) {
+      const phrases = {
+        name: `${info.name || 'Robin'}'s full name is ${info.name || '[name not set]'}.`,
+        dob: `The date of birth is ${info.dob || '[not set]'}.`,
+        phone: `The phone number is ${info.phone || '[not set]'}.`,
+        address: `The address is ${info.address || '[not set]'}.`,
+        insurance: `The insurance information is ${info.insurance || '[not set]'}.`,
+        pharmacy: `The pharmacy is ${info.pharmacy || '[not set]'}.`
+      };
+      speak(phrases[type]);
+    }
+
+    function speakCustom() {
+      const text = document.getElementById('customText').value.trim();
+      if (text) {
+        speak(text);
+        document.getElementById('customText').value = '';
+      }
+    }
+
+    function speakFullScript() {
+      const scripts = {
+        doctor: `Hello, I'm Juniper, an AI voice assistant calling on behalf of ${info.name || 'Robin'}. ${info.name || 'Robin'} can hear everything but uses me to communicate. We're calling to schedule an appointment. ${info.name || 'Robin'}'s date of birth is ${info.dob || 'not provided yet'}.`,
+        pharmacy: `Hello, I'm Juniper, an AI voice assistant calling on behalf of ${info.name || 'Robin'}. We're calling to refill a prescription. ${info.name || 'Robin'}'s date of birth is ${info.dob || 'not provided yet'}.`,
+        transport: `Hello, I'm Juniper, an AI voice assistant calling on behalf of ${info.name || 'Robin'}. We need to schedule a ride. Pickup address is ${info.address || 'not provided yet'}.`
+      };
+      speak(scripts[currentScriptTab]);
+    }
+
+    function stopSpeaking() {
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+      }
+      setStatus('ready', 'Stopped');
+    }
+
+    // ============================================
+    // TRANSCRIPT
+    // ============================================
+    function addToTranscript(who, text) {
+      const box = document.getElementById('transcript');
+      const placeholder = box.querySelector('.placeholder');
+      if (placeholder) placeholder.remove();
+
+      const entry = document.createElement('div');
+      entry.className = who;
+      entry.textContent = (who === 'juniper' ? '🌿 ' : '👤 ') + text;
+      box.appendChild(entry);
+      box.scrollTop = box.scrollHeight;
+
+      // Keep only last 10 entries
+      while (box.children.length > 10) {
+        box.removeChild(box.firstChild);
+      }
+    }
+
+    // ============================================
+    // STATUS
+    // ============================================
+    function setStatus(state, text) {
+      const dot = document.getElementById('statusDot');
+      dot.className = 'status-dot ' + state;
+      document.getElementById('statusText').textContent = text;
+    }
+  </script>
+</body>
+</html>

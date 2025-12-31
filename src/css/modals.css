@@ -1,0 +1,321 @@
+/* Juniper v6.2.1 - Modal Styles */
+
+/* Modal Overlay */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.9);
+  z-index: 100;
+  overflow-y: auto;
+  padding: 15px;
+}
+
+.modal-overlay.show {
+  display: block;
+}
+
+.modal {
+  background: var(--bg-primary);
+  border-radius: 16px;
+  padding: 16px;
+  width: 100%;
+  max-width: 440px;
+  margin: 20px auto;
+  border: 1px solid var(--border-color);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h3 {
+  font-size: 1rem;
+  color: var(--accent-secondary);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.8rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.modal-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.modal-tab {
+  padding: 8px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.modal-tab.active {
+  background: var(--accent-primary);
+  color: white;
+  border-color: var(--accent-primary);
+}
+
+/* Form Elements */
+.form-group {
+  margin-bottom: 12px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+}
+
+.form-group select option {
+  background: var(--bg-primary);
+}
+
+.form-group .hint {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.form-row.three {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.save-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-success));
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 12px;
+}
+
+.add-btn {
+  width: 100%;
+  padding: 10px;
+  background: var(--bg-secondary);
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.add-btn:hover {
+  border-color: var(--accent-primary);
+  color: var(--text-secondary);
+}
+
+/* Item Cards (Insurance, Pharmacy) */
+.item-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 8px;
+}
+
+.item-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.item-card-title {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--accent-secondary);
+}
+
+.item-card-delete {
+  background: none;
+  border: none;
+  color: var(--accent-danger);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.item-card-detail {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 2px;
+}
+
+.primary-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  background: rgba(93,138,74,0.2);
+  border-radius: 10px;
+  font-size: 0.65rem;
+  color: var(--accent-secondary);
+  margin-left: 6px;
+}
+
+/* Icon Picker */
+.icon-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.icon-option {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+
+.icon-option:hover {
+  border-color: var(--accent-primary);
+}
+
+.icon-option.selected {
+  border-color: var(--accent-success);
+  background: rgba(107,155,90,0.2);
+}
+
+/* Modal Actions */
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.modal-btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.modal-btn.cancel {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.modal-btn.save {
+  background: linear-gradient(135deg, var(--accent-success), #5a8a4a);
+  color: white;
+}
+
+/* API Row */
+.api-row {
+  display: flex;
+  gap: 8px;
+}
+
+.api-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+}
+
+.api-row button {
+  padding: 10px 14px;
+  background: var(--accent-primary);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.key-status {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+.key-status.saved {
+  color: var(--accent-success);
+}
+
+/* Placeholder Help */
+.placeholder-help {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+  padding: 8px;
+  background: var(--bg-input);
+  border-radius: 6px;
+  line-height: 1.6;
+}
+
+.placeholder-help code {
+  background: rgba(93,138,74,0.2);
+  padding: 1px 4px;
+  border-radius: 3px;
+  color: var(--accent-secondary);
+}
+
+.loading-msg {
+  text-align: center;
+  padding: 15px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}

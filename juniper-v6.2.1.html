@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Juniper v6.2.1</title>
+  <style>
+    :root {
+      --bg-primary: #1a2418;
+      --bg-secondary: #2d3a29;
+      --bg-card: rgba(45, 58, 41, 0.95);
+      --bg-input: rgba(0, 0, 0, 0.25);
+      --accent-primary: #5d8a4a;
+      --accent-secondary: #8fbc7a;
+      --accent-warm: #a67c52;
+      --accent-success: #6b9b5a;
+      --accent-info: #7ab8a8;
+      --accent-danger: #c45c4a;
+      --text-primary: #e8efe6;
+      --text-secondary: #b5c4b0;
+      --text-muted: #6b7d66;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(93, 138, 74, 0.4);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { overflow-x: hidden; width: 100%; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(160deg, var(--bg-primary) 0%, #12180f 100%); min-height: 100vh; padding: 10px; padding-bottom: 80px; color: var(--text-primary); }
+    .container { max-width: 480px; margin: 0 auto; width: 100%; }
+    header { text-align: center; padding: 14px 0; border-bottom: 1px solid var(--border-color); margin-bottom: 12px; }
+    header h1 { font-size: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    header p { color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px; }
+    .juniper-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+    .version { font-size: 0.65rem; color: var(--text-muted); margin-top: 2px; }
+    .card { background: var(--bg-card); border-radius: 12px; padding: 14px; margin-bottom: 10px; border: 1px solid var(--border-color); }
+    .card h2 { font-size: 0.95rem; margin-bottom: 12px; color: var(--accent-secondary); }
+    .collapse-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .collapse-header .arrow { font-size: 0.75rem; color: var(--text-muted); transition: transform 0.3s; }
+    .collapse-header.collapsed .arrow { transform: rotate(-90deg); }
+    .collapse-content { overflow: hidden; max-height: 2000px; transition: max-height 0.3s; }
+    .collapse-content.collapsed { max-height: 0; }
+    .custom-row { display: flex; gap: 8px; }
+    .custom-input { flex: 1; min-width: 0; padding: 14px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-input); color: var(--text-primary); font-size: 1rem; }
+    .custom-input::placeholder { color: var(--text-muted); }
+    .custom-input:focus { outline: none; border-color: var(--accent-primary); }
+    .send-btn { padding: 14px 22px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-success)); border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; }
+    .status-bar { display: flex; align-items: center; gap: 12px; padding: 8px 14px; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border-color); }
+    .status-indicator { display: flex; align-items: center; gap: 8px; flex: 1; }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent-success); box-shadow: 0 0 6px var(--accent-success); }
+    .status-dot.speaking { background: var(--accent-info); animation: pulse 1s infinite; }
+    .status-dot.loading { background: var(--accent-warm); animation: pulse 0.5s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .status-text { font-size: 0.85rem; color: var(--text-secondary); }
+    .stop-btn { padding: 8px 16px; background: var(--accent-danger); border: none; border-radius: 6px; color: white; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .main-btn-wrapper { position: relative; margin-bottom: 8px; }
+    .main-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; color: white; font-size: 0.95rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .main-btn.intro { background: linear-gradient(135deg, var(--accent-primary), #4a7339); }
+    .main-btn.verify { background: linear-gradient(135deg, var(--accent-warm), #8b6540); }
+    .edit-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.3); border: none; color: white; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 0.75rem; opacity: 0.6; }
+    .edit-btn:hover { opacity: 1; }
+    .tabs { display: flex; gap: 4px; margin-bottom: 10px; }
+    .tab { flex: 1; padding: 10px 6px; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-muted); cursor: pointer; font-size: 0.75rem; text-align: center; }
+    .tab.active { background: var(--bg-secondary); color: var(--accent-secondary); border-color: var(--border-accent); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .hotkey-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .hotkey-btn { padding: 12px 6px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-size: 0.75rem; cursor: pointer; text-align: center; }
+    .hotkey-btn:active { transform: scale(0.95); }
+    .hotkey-btn.yes { background: rgba(107, 155, 90, 0.2); border-color: rgba(107, 155, 90, 0.5); }
+    .hotkey-btn.no { background: rgba(196, 92, 74, 0.2); border-color: rgba(196, 92, 74, 0.5); }
+    .hotkey-btn .icon { font-size: 1.1rem; display: block; margin-bottom: 4px; }
+    .hotkey-btn .label { display: block; }
+    .hotkey-btn .full-text { display: none; font-size: 0.6rem; color: var(--text-muted); margin-top: 4px; }
+    @media (hover: hover) { .hotkey-btn:hover .full-text { display: block; } .hotkey-btn:hover { border-color: var(--accent-primary); } }
+    .quick-scripts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color); }
+    .quick-script-btn { padding: 8px 12px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+    .quick-script-btn:hover { border-color: var(--accent-primary); }
+    .toolbar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 12px; }
+    .toolbar-btn { padding: 10px 6px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-secondary); font-size: 0.7rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .toolbar-btn:hover { border-color: var(--accent-primary); color: var(--text-primary); }
+    .toolbar-btn .tb-icon { font-size: 1.1rem; }
+    .scripts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .script-card { padding: 12px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; position: relative; }
+    .script-card:hover { border-color: var(--accent-primary); }
+    .script-card .script-icon { font-size: 1.2rem; margin-bottom: 4px; }
+    .script-card .script-name { font-weight: 600; font-size: 0.85rem; margin-bottom: 4px; }
+    .script-card .script-preview { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .script-card .delete-script { position: absolute; top: 6px; right: 6px; width: 20px; height: 20px; background: var(--accent-danger); border: none; border-radius: 50%; color: white; font-size: 0.7rem; cursor: pointer; display: none; align-items: center; justify-content: center; }
+    .script-card:hover .delete-script { display: flex; }
+    .no-scripts { grid-column: span 2; text-align: center; padding: 25px; color: var(--text-muted); }
+    .history-list { max-height: 120px; overflow-y: auto; }
+    .history-item { padding: 10px; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-secondary); }
+    .history-item:hover { background: rgba(255,255,255,0.05); }
+    .history-item .time { font-size: 0.7rem; color: var(--text-muted); }
+    .clear-btn { padding: 6px 12px; background: transparent; border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-muted); font-size: 0.75rem; cursor: pointer; }
+    .footer { text-align: center; font-size: 0.7rem; color: var(--text-muted); margin-top: 16px; }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 100; overflow-y: auto; padding: 15px; }
+    .modal-overlay.show { display: block; }
+    .modal { background: var(--bg-primary); border-radius: 16px; padding: 16px; width: 100%; max-width: 440px; margin: 20px auto; border: 1px solid var(--border-color); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); }
+    .modal-header h3 { font-size: 1rem; color: var(--accent-secondary); }
+    .modal-close { background: none; border: none; color: var(--text-muted); font-size: 1.8rem; cursor: pointer; line-height: 1; }
+    .modal-tabs { display: flex; gap: 4px; margin-bottom: 14px; flex-wrap: wrap; }
+    .modal-tab { padding: 8px 12px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 20px; color: var(--text-muted); font-size: 0.75rem; cursor: pointer; }
+    .modal-tab.active { background: var(--accent-primary); color: white; border-color: var(--accent-primary); }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-size: 0.9rem; font-family: inherit; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--accent-primary); }
+    .form-group select option { background: var(--bg-primary); }
+    .form-group .hint { font-size: 0.65rem; color: var(--text-muted); margin-top: 3px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .form-row.three { grid-template-columns: 1fr 1fr 1fr; }
+    .save-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-success)); border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; margin-top: 12px; }
+    .add-btn { width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px dashed var(--border-color); border-radius: 8px; color: var(--text-muted); font-size: 0.8rem; cursor: pointer; margin-top: 8px; }
+    .add-btn:hover { border-color: var(--accent-primary); color: var(--text-secondary); }
+    .item-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; margin-bottom: 8px; }
+    .item-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .item-card-title { font-weight: 600; font-size: 0.85rem; color: var(--accent-secondary); }
+    .item-card-delete { background: none; border: none; color: var(--accent-danger); cursor: pointer; font-size: 0.9rem; }
+    .item-card-detail { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 2px; }
+    .primary-tag { display: inline-block; padding: 2px 8px; background: rgba(93,138,74,0.2); border-radius: 10px; font-size: 0.65rem; color: var(--accent-secondary); margin-left: 6px; }
+    .icon-picker { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .icon-option { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; font-size: 1.1rem; }
+    .icon-option:hover { border-color: var(--accent-primary); }
+    .icon-option.selected { border-color: var(--accent-success); background: rgba(107,155,90,0.2); }
+    .section-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin: 12px 0 8px; }
+    .voice-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .filter-btn { padding: 6px 10px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; color: var(--text-muted); font-size: 0.7rem; cursor: pointer; }
+    .filter-btn.active { background: var(--accent-primary); color: white; border-color: var(--accent-primary); }
+    .voice-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; max-height: 200px; overflow-y: auto; }
+    .voice-card { padding: 8px 6px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; text-align: center; }
+    .voice-card.selected { border-color: var(--accent-success); background: rgba(107,155,90,0.2); }
+    .voice-card .voice-name { font-size: 0.7rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .voice-card .voice-meta { font-size: 0.6rem; color: var(--text-muted); margin-top: 2px; }
+    .special-voice { padding: 10px; background: rgba(107,155,90,0.2); border: 2px solid var(--accent-success); border-radius: 10px; cursor: pointer; text-align: center; margin-bottom: 8px; }
+    .special-voice.selected { background: rgba(107,155,90,0.35); }
+    .special-voice .voice-name { font-weight: 700; font-size: 0.85rem; }
+    .special-voice .voice-meta { font-size: 0.7rem; color: var(--accent-success); margin-top: 2px; }
+    .voice-count { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 6px; }
+    .loading-msg { text-align: center; padding: 15px; color: var(--text-muted); font-size: 0.85rem; }
+    .voice-controls { display: flex; gap: 8px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
+    .test-btn { padding: 10px 16px; background: linear-gradient(135deg, var(--accent-success), #5a8a4a); border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; }
+    .test-btn.stop-mode { background: var(--accent-danger); }
+    .test-btn:disabled { opacity: 0.4; }
+    .speed-control { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 150px; }
+    .speed-control label { font-size: 0.75rem; color: var(--text-muted); }
+    .speed-slider { flex: 1; height: 4px; -webkit-appearance: none; background: var(--bg-input); border-radius: 2px; }
+    .speed-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: var(--accent-primary); border-radius: 50%; cursor: pointer; }
+    .speed-value { font-size: 0.75rem; color: var(--accent-primary); min-width: 35px; }
+    .api-row { display: flex; gap: 8px; }
+    .api-row input { flex: 1; min-width: 0; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-size: 0.85rem; }
+    .api-row button { padding: 10px 14px; background: var(--accent-primary); border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; }
+    .key-status { font-size: 0.75rem; color: var(--text-muted); margin-top: 6px; }
+    .key-status.saved { color: var(--accent-success); }
+    .script-tabs { display: flex; gap: 4px; margin-bottom: 14px; flex-wrap: wrap; }
+    .script-tab { padding: 8px 12px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 20px; color: var(--text-muted); font-size: 0.75rem; cursor: pointer; }
+    .script-tab.active { background: var(--accent-primary); color: white; }
+    .script-item { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+    .script-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .script-item-title { font-weight: 600; color: var(--accent-secondary); font-size: 0.85rem; }
+    .script-item-btn { width: 30px; height: 30px; background: var(--bg-input); border: none; border-radius: 6px; color: var(--text-secondary); cursor: pointer; margin-left: 4px; }
+    .script-item-btn:hover { color: var(--accent-primary); }
+    .script-item-text { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; }
+    .add-custom-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, var(--accent-warm), #8b6540); border: none; border-radius: 10px; color: white; font-weight: 600; cursor: pointer; margin-top: 10px; }
+    .create-script-section { display: none; }
+    .create-script-section.active { display: block; }
+    .ai-generate-btn { padding: 10px 14px; background: var(--bg-secondary); border: 1px solid var(--border-accent); border-radius: 8px; color: var(--accent-secondary); font-size: 0.8rem; cursor: pointer; margin-bottom: 12px; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .modal-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .modal-btn.cancel { background: var(--bg-secondary); color: var(--text-primary); }
+    .modal-btn.save { background: linear-gradient(135deg, var(--accent-success), #5a8a4a); color: white; }
+    .placeholder-help { font-size: 0.7rem; color: var(--text-muted); margin-top: 8px; padding: 8px; background: var(--bg-input); border-radius: 6px; line-height: 1.6; }
+    .placeholder-help code { background: rgba(93,138,74,0.2); padding: 1px 4px; border-radius: 3px; color: var(--accent-secondary); }
+    .agent-section { margin-bottom: 18px; }
+    .agent-section h4 { font-size: 0.85rem; color: var(--accent-secondary); margin-bottom: 10px; }
+    .agent-description { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px; line-height: 1.5; padding: 8px; background: var(--bg-input); border-radius: 8px; }
+    .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 6px; }
+    .setting-info { flex: 1; }
+    .setting-label { font-size: 0.85rem; }
+    .setting-desc { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+    .toggle-switch { width: 48px; height: 26px; background: var(--bg-input); border-radius: 13px; position: relative; cursor: pointer; border: none; }
+    .toggle-switch.active { background: var(--accent-success); }
+    .toggle-switch::after { content: ''; position: absolute; width: 20px; height: 20px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: left 0.3s; }
+    .toggle-switch.active::after { left: 25px; }
+    .setting-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .setting-chip { padding: 6px 10px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; font-size: 0.75rem; color: var(--text-muted); cursor: pointer; }
+    .setting-chip.active { background: rgba(107,155,90,0.25); border-color: var(--accent-success); color: var(--accent-success); }
+    @media (max-width: 400px) { .hotkey-grid, .voice-grid { grid-template-columns: repeat(2, 1fr); } .scripts-grid { grid-template-columns: 1fr; } .form-row, .form-row.three { grid-template-columns: 1fr; } .toolbar { grid-template-columns: repeat(2, 1fr); } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><div class="juniper-icon">🌿</div> Juniper</h1>
+      <p id="headerSubtitle">Your AI Voice Assistant</p>
+      <div class="version">v6.2.1</div>
+    </header>
+
+    <div class="card">
+      <h2>💬 Type Anything</h2>
+      <div class="custom-row">
+        <input type="text" class="custom-input" id="customText" placeholder="Type what Juniper should say...">
+        <button class="send-btn" onclick="speakCustom()" title="Speak the typed text">Say</button>
+      </div>
+      <div class="status-bar">
+        <div class="status-indicator">
+          <div class="status-dot" id="statusDot"></div>
+          <span class="status-text" id="statusText">Ready</span>
+        </div>
+        <button class="stop-btn" onclick="stopSpeaking()" title="Stop speaking">Stop</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📞 Quick Speak</h2>
+      <div class="main-btn-wrapper">
+        <button class="main-btn intro" onclick="speakIntro()" title="Introduce Juniper">🌿 <span id="introBtnText">"Hello, I'm Juniper..."</span></button>
+        <button class="edit-btn" onclick="editIntroBtn()" title="Edit">✏️</button>
+      </div>
+      <div class="main-btn-wrapper">
+        <button class="main-btn verify" onclick="speakVerify()" title="Hand off to verify">🎤 <span id="verifyBtnText">"Let me verify..."</span></button>
+        <button class="edit-btn" onclick="editVerifyBtn()" title="Edit">✏️</button>
+      </div>
+      <div class="tabs">
+        <button class="tab active" onclick="showTab('common',this)" title="Common phrases">Common</button>
+        <button class="tab" onclick="showTab('info',this)" title="Your info">My Info</button>
+        <button class="tab" onclick="showTab('calls',this)" title="Call phrases">Calls</button>
+      </div>
+      <div id="tab-common" class="tab-content active">
+        <div class="hotkey-grid">
+          <button class="hotkey-btn yes" data-msg="Yes, that is correct." title="Confirm"><span class="icon">✓</span><span class="label">Yes</span><span class="full-text">That is correct</span></button>
+          <button class="hotkey-btn no" data-msg="No, that is not correct." title="Deny"><span class="icon">✗</span><span class="label">No</span><span class="full-text">Not correct</span></button>
+          <button class="hotkey-btn" data-msg="Could you please repeat that?" title="Ask to repeat"><span class="icon">🔄</span><span class="label">Repeat</span><span class="full-text">Please repeat</span></button>
+          <button class="hotkey-btn" data-msg="One moment please." title="Pause"><span class="icon">⏳</span><span class="label">Moment</span><span class="full-text">One moment</span></button>
+          <button class="hotkey-btn" data-msg="Could you speak slower please?" title="Slow down"><span class="icon">🐢</span><span class="label">Slower</span><span class="full-text">Speak slower</span></button>
+          <button class="hotkey-btn" data-msg="Thank you very much." title="Thank"><span class="icon">🙏</span><span class="label">Thanks</span><span class="full-text">Thank you</span></button>
+        </div>
+      </div>
+      <div id="tab-info" class="tab-content">
+        <div class="hotkey-grid">
+          <button class="hotkey-btn" data-info="name" title="Full name"><span class="icon">👤</span><span class="label">Name</span><span class="full-text">Full name</span></button>
+          <button class="hotkey-btn" data-info="dob" title="Date of birth"><span class="icon">🎂</span><span class="label">DOB</span><span class="full-text">Date of birth</span></button>
+          <button class="hotkey-btn" data-info="phone" title="Phone number"><span class="icon">📱</span><span class="label">Phone</span><span class="full-text">Phone number</span></button>
+          <button class="hotkey-btn" data-info="address" title="Address"><span class="icon">📍</span><span class="label">Address</span><span class="full-text">Full address</span></button>
+          <button class="hotkey-btn" data-info="insurance" title="Insurance"><span class="icon">🏥</span><span class="label">Insurance</span><span class="full-text">Insurance ID</span></button>
+          <button class="hotkey-btn" data-info="pharmacy" title="Pharmacy"><span class="icon">💊</span><span class="label">Pharmacy</span><span class="full-text">Pharmacy</span></button>
+        </div>
+      </div>
+      <div id="tab-calls" class="tab-content">
+        <div class="hotkey-grid">
+          <button class="hotkey-btn" data-msg="I am calling to schedule an appointment." title="Schedule"><span class="icon">📅</span><span class="label">Appointment</span><span class="full-text">Schedule appt</span></button>
+          <button class="hotkey-btn" data-msg="I am calling to refill a prescription." title="Refill Rx"><span class="icon">💊</span><span class="label">Refill</span><span class="full-text">Refill prescription</span></button>
+          <button class="hotkey-btn" data-msg="I am calling about my test results." title="Test results"><span class="icon">📋</span><span class="label">Results</span><span class="full-text">Test results</span></button>
+          <button class="hotkey-btn" data-msg="I need to reschedule please." title="Reschedule"><span class="icon">🔄</span><span class="label">Reschedule</span><span class="full-text">Reschedule</span></button>
+          <button class="hotkey-btn" data-msg="I have a billing question." title="Billing"><span class="icon">💰</span><span class="label">Billing</span><span class="full-text">Billing question</span></button>
+          <button class="hotkey-btn" data-msg="May I speak with a nurse please?" title="Nurse"><span class="icon">👩‍⚕️</span><span class="label">Nurse</span><span class="full-text">Speak with nurse</span></button>
+        </div>
+      </div>
+      <div class="quick-scripts" id="quickScripts"></div>
+      <div class="toolbar">
+        <button class="toolbar-btn" onclick="openFullScriptsModal()" title="Full call scripts"><span class="tb-icon">📜</span>Scripts</button>
+        <button class="toolbar-btn" onclick="openAgentsModal()" title="AI settings"><span class="tb-icon">🤖</span>AI</button>
+        <button class="toolbar-btn" onclick="openVoiceModal()" title="Voice settings"><span class="tb-icon">🎤</span>Voice</button>
+        <button class="toolbar-btn" onclick="openInfoModal()" title="Your information"><span class="tb-icon">⚙️</span>Info</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="collapse-header" onclick="toggleCollapse('scripts')">
+        <h2 style="margin:0;">⭐ My Scripts</h2>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="clear-btn" onclick="event.stopPropagation();openMyScriptModal()" title="New script">+ New</button>
+          <span class="arrow">▼</span>
+        </div>
+      </div>
+      <div id="scripts-content" class="collapse-content collapsed">
+        <div class="scripts-grid" id="scriptsGrid"><div class="no-scripts">Tap "+ New"</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="collapse-header" onclick="toggleCollapse('history')">
+        <h2 style="margin:0;flex:1;">📜 History</h2>
+        <button class="clear-btn" onclick="event.stopPropagation();clearHistory()" title="Clear">Clear</button>
+        <span class="arrow" style="margin-left:8px;">▼</span>
+      </div>
+      <div id="history-content" class="collapse-content collapsed">
+        <div class="history-list" id="historyList"><p style="color:var(--text-muted);padding:10px;">Messages appear here</p></div>
+      </div>
+    </div>
+
+    <div class="footer">🌿 Juniper v6.2.1</div>
+  </div>
+
+  <!-- MY INFO MODAL -->
+  <div class="modal-overlay" id="infoModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>⚙️ My Information</h3>
+        <button class="modal-close" onclick="closeInfoModal()">×</button>
+      </div>
+      <div class="modal-tabs">
+        <button class="modal-tab active" onclick="showInfoTab('basic',this)">Basic</button>
+        <button class="modal-tab" onclick="showInfoTab('insurance',this)">Insurance</button>
+        <button class="modal-tab" onclick="showInfoTab('pharmacy',this)">Pharmacy</button>
+        <button class="modal-tab" onclick="showInfoTab('api',this)">API</button>
+      </div>
+      <div id="infoTab-basic" class="tab-content active">
+        <div class="form-row">
+          <div class="form-group"><label>First Name</label><input type="text" id="infoFirstName" placeholder="First name"></div>
+          <div class="form-group"><label>Pronounce</label><input type="text" id="infoPronounceFirst" placeholder="How to say it"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Last Name</label><input type="text" id="infoLastName" placeholder="Last name"></div>
+          <div class="form-group"><label>Pronounce</label><input type="text" id="infoPronounceLast" placeholder="How to say it"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Nickname</label><input type="text" id="infoNickname" placeholder="Nickname"></div>
+          <div class="form-group"><label>Pronounce</label><input type="text" id="infoPronounceNick" placeholder="How to say it"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Date of Birth</label><input type="text" id="infoDOB" placeholder="Month Day, Year"></div>
+          <div class="form-group"><label>Phone</label><input type="text" id="infoPhone" placeholder="5551234567"><div class="hint">Numbers only</div></div>
+        </div>
+        <div class="form-group"><label>Address 1</label><input type="text" id="infoAddress1" placeholder="Street address"></div>
+        <div class="form-group"><label>Address 2</label><input type="text" id="infoAddress2" placeholder="Apt, Suite"></div>
+        <div class="form-row three">
+          <div class="form-group"><label>City</label><input type="text" id="infoCity" placeholder="City"></div>
+          <div class="form-group"><label>State</label><input type="text" id="infoState" placeholder="ST"></div>
+          <div class="form-group"><label>ZIP</label><input type="text" id="infoZip" placeholder="12345"></div>
+        </div>
+        <button class="save-btn" onclick="saveInfo()">✓ Save Information</button>
+      </div>
+      <div id="infoTab-insurance" class="tab-content">
+        <div id="insuranceList"></div>
+        <button class="add-btn" onclick="addInsurance()">+ Add Insurance</button>
+      </div>
+      <div id="infoTab-pharmacy" class="tab-content">
+        <div id="pharmacyList"></div>
+        <button class="add-btn" onclick="addPharmacy()">+ Add Pharmacy</button>
+      </div>
+      <div id="infoTab-api" class="tab-content">
+        <div class="form-group">
+          <label>ElevenLabs API Key</label>
+          <div class="api-row"><input type="password" id="apiKey" placeholder="Your key"><button onclick="saveApiKey()">Save</button></div>
+          <div id="keyStatus" class="key-status">For voice</div>
+        </div>
+        <div class="form-group" style="margin-top:16px;">
+          <label>Claude API Key</label>
+          <div class="api-row"><input type="password" id="claudeKey" placeholder="Your key"><button onclick="saveClaudeKey()">Save</button></div>
+          <div id="claudeStatus" class="key-status">For AI</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VOICE MODAL -->
+  <div class="modal-overlay" id="voiceModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>🎤 Voice</h3>
+        <button class="modal-close" onclick="closeVoiceModal()">×</button>
+      </div>
+      <div class="section-label">Your Voices</div>
+      <div id="specialVoices"><div class="loading-msg">Add API key</div></div>
+      <div class="section-label">All Voices</div>
+      <div class="voice-filters">
+        <button class="filter-btn active" onclick="filterVoices('all',this)">All</button>
+        <button class="filter-btn" onclick="filterVoices('female',this)">👩</button>
+        <button class="filter-btn" onclick="filterVoices('male',this)">👨</button>
+        <button class="filter-btn" onclick="filterVoices('american',this)">🇺🇸</button>
+        <button class="filter-btn" onclick="filterVoices('british',this)">🇬🇧</button>
+      </div>
+      <div class="voice-count" id="voiceCount">-</div>
+      <div class="voice-grid" id="voiceGrid"><div class="loading-msg">Add API key</div></div>
+      <div class="voice-controls">
+        <button class="test-btn" id="testBtn" onclick="toggleTest()" disabled>🔊 Test</button>
+        <div class="speed-control">
+          <label>Speed:</label>
+          <input type="range" class="speed-slider" id="speedSlider" min="0.8" max="1.2" step="0.05" value="0.95">
+          <span class="speed-value" id="speedValue">0.95x</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FULL SCRIPTS MODAL -->
+  <div class="modal-overlay" id="fullScriptsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>📜 Scripts</h3>
+        <button class="modal-close" onclick="closeFullScriptsModal()">×</button>
+      </div>
+      <div id="browseScriptsView">
+        <div class="script-tabs">
+          <button class="script-tab active" onclick="showScriptCategory('doctor',this)">Doctor</button>
+          <button class="script-tab" onclick="showScriptCategory('pharmacy',this)">Pharmacy</button>
+          <button class="script-tab" onclick="showScriptCategory('transport',this)">Transport</button>
+          <button class="script-tab" onclick="showScriptCategory('insurance',this)">Insurance</button>
+          <button class="script-tab" onclick="showScriptCategory('custom',this)">Custom</button>
+        </div>
+        <div id="scriptList"></div>
+        <button class="add-custom-btn" onclick="showCreateScriptView()">✏️ Add or Edit</button>
+      </div>
+      <div id="createScriptView" class="create-script-section">
+        <div class="form-group"><label>Describe</label><input type="text" id="scriptDescribe" placeholder="What you need"></div>
+        <button class="ai-generate-btn" onclick="generateScriptAI()">✨ Generate with AI</button>
+        <div class="form-group"><label>Script</label><textarea id="generatedScript" rows="4" placeholder="Type your script..."></textarea></div>
+        <div class="placeholder-help"><code>[FIRST]</code> <code>[LAST]</code> <code>[FULL_NAME]</code> <code>[DOB]</code> <code>[ADDRESS]</code> <code>[INSURANCE]</code> <code>[PHARMACY]</code></div>
+        <div class="form-row">
+          <div class="form-group"><label>Name</label><input type="text" id="newScriptName" placeholder="Script name"></div>
+          <div class="form-group"><label>Category</label><select id="newScriptCat"><option value="custom">Custom</option><option value="doctor">Doctor</option><option value="pharmacy">Pharmacy</option><option value="transport">Transport</option><option value="insurance">Insurance</option></select></div>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn cancel" onclick="hideCreateScriptView()">Cancel</button>
+          <button class="modal-btn save" onclick="saveFullScript()">✓ Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI AGENTS MODAL -->
+  <div class="modal-overlay" id="agentsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>🤖 AI Agents</h3>
+        <button class="modal-close" onclick="closeAgentsModal()">×</button>
+      </div>
+      <div class="agent-section">
+        <h4>📝 Scribe</h4>
+        <div class="agent-description">Creates summaries after calls</div>
+        <div class="setting-row"><div class="setting-info"><div class="setting-label">Auto-summarize</div></div><button class="toggle-switch active" id="toggleSum" onclick="toggleSetting('sum')"></button></div>
+        <div class="setting-row"><div class="setting-info"><div class="setting-label">Extract key info</div></div><button class="toggle-switch active" id="toggleExt" onclick="toggleSetting('ext')"></button></div>
+      </div>
+      <div class="agent-section">
+        <h4>🗣️ Smart Response</h4>
+        <div class="agent-description">Auto-answers common questions</div>
+        <div class="setting-row"><div class="setting-info"><div class="setting-label">Enable</div></div><button class="toggle-switch active" id="toggleAuto" onclick="toggleSetting('auto')"></button></div>
+        <div style="margin-top:10px;font-size:0.75rem;color:var(--text-muted);">Auto-answer:</div>
+        <div class="setting-chips">
+          <button class="setting-chip active" onclick="this.classList.toggle('active')">🎂 DOB</button>
+          <button class="setting-chip active" onclick="this.classList.toggle('active')">📱 Phone</button>
+          <button class="setting-chip active" onclick="this.classList.toggle('active')">📍 Address</button>
+          <button class="setting-chip active" onclick="this.classList.toggle('active')">🏥 Insurance</button>
+          <button class="setting-chip active" onclick="this.classList.toggle('active')">💊 Pharmacy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MY SCRIPT MODAL -->
+  <div class="modal-overlay" id="myScriptModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>➕ New Script</h3>
+        <button class="modal-close" onclick="closeMyScriptModal()">×</button>
+      </div>
+      <div class="form-group"><label>Icon</label>
+        <div class="icon-picker" id="iconPicker">
+          <div class="icon-option selected" data-icon="⭐" onclick="selectIcon(this)">⭐</div>
+          <div class="icon-option" data-icon="💬" onclick="selectIcon(this)">💬</div>
+          <div class="icon-option" data-icon="📞" onclick="selectIcon(this)">📞</div>
+          <div class="icon-option" data-icon="🏥" onclick="selectIcon(this)">🏥</div>
+          <div class="icon-option" data-icon="💊" onclick="selectIcon(this)">💊</div>
+          <div class="icon-option" data-icon="🚗" onclick="selectIcon(this)">🚗</div>
+          <div class="icon-option" data-icon="😊" onclick="selectIcon(this)">😊</div>
+          <div class="icon-option" data-icon="👋" onclick="selectIcon(this)">👋</div>
+          <div class="icon-option" data-icon="❤️" onclick="selectIcon(this)">❤️</div>
+          <div class="icon-option" data-icon="🎉" onclick="selectIcon(this)">🎉</div>
+        </div>
+      </div>
+      <div class="form-group"><label>Label</label><input type="text" id="myScriptName" placeholder="Short name"></div>
+      <div class="form-group"><label>Text</label><textarea id="myScriptText" rows="3" placeholder="What Juniper says"></textarea></div>
+      <div class="form-group"><label>Show in Quick Speak?</label><select id="myScriptQuick"><option value="yes">Yes</option><option value="no">No</option></select></div>
+      <div class="modal-actions">
+        <button class="modal-btn cancel" onclick="closeMyScriptModal()">Cancel</button>
+        <button class="modal-btn save" onclick="saveMyScript()">✓ Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD INSURANCE MODAL -->
+  <div class="modal-overlay" id="addInsuranceModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>➕ Insurance</h3>
+        <button class="modal-close" onclick="closeAddInsuranceModal()">×</button>
+      </div>
+      <div class="form-group"><label>Type</label><select id="insType"><option>Medical</option><option>Dental</option><option>Vision</option><option>Medicare</option><option>Medicaid</option><option>CHIP</option><option>Pet</option><option>Other</option></select></div>
+      <div class="form-group"><label>Provider</label><input type="text" id="insProvider" placeholder="Company name"></div>
+      <div class="form-group"><label>Member ID</label><input type="text" id="insMemberId" placeholder="ID number"></div>
+      <div class="form-group"><label>Group</label><input type="text" id="insGroup" placeholder="Group number"></div>
+      <div class="form-group"><label>Phone</label><input type="text" id="insPhone" placeholder="Customer service"></div>
+      <div class="form-group"><label>RxBIN</label><input type="text" id="insRxBin" placeholder="If applicable"></div>
+      <div class="form-group"><label>RxPCN</label><input type="text" id="insRxPcn" placeholder="If applicable"></div>
+      <div class="modal-actions">
+        <button class="modal-btn cancel" onclick="closeAddInsuranceModal()">Cancel</button>
+        <button class="modal-btn save" onclick="saveInsurance()">✓ Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD PHARMACY MODAL -->
+  <div class="modal-overlay" id="addPharmacyModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>➕ Pharmacy</h3>
+        <button class="modal-close" onclick="closeAddPharmacyModal()">×</button>
+      </div>
+      <div class="form-group"><label>Name</label><input type="text" id="pharmName" placeholder="Pharmacy name"></div>
+      <div class="form-group"><label>Location</label><input type="text" id="pharmLocation" placeholder="Which one"></div>
+      <div class="form-group"><label>Phone</label><input type="text" id="pharmPhone" placeholder="Phone number"><div class="hint">Numbers only</div></div>
+      <div class="form-group"><label>Address</label><input type="text" id="pharmAddress" placeholder="Full address"></div>
+      <div class="form-group"><label>Primary?</label><select id="pharmPrimary"><option value="yes">Yes</option><option value="no">No</option></select></div>
+      <div class="modal-actions">
+        <button class="modal-btn cancel" onclick="closeAddPharmacyModal()">Cancel</button>
+        <button class="modal-btn save" onclick="savePharmacy()">✓ Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT BUTTON MODAL -->
+  <div class="modal-overlay" id="editBtnModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="editBtnTitle">Edit Button</h3>
+        <button class="modal-close" onclick="closeEditBtnModal()">×</button>
+      </div>
+      <div class="form-group"><label>Button Label</label><input type="text" id="editBtnLabel" placeholder="Short label"></div>
+      <div class="form-group"><label>Full Text</label><textarea id="editBtnText" rows="4" placeholder="What Juniper says"></textarea></div>
+      <div class="placeholder-help">Use <code>[FIRST]</code> <code>[LAST]</code> <code>[FULL_NAME]</code></div>
+      <div class="modal-actions">
+        <button class="modal-btn cancel" onclick="closeEditBtnModal()">Cancel</button>
+        <button class="modal-btn save" onclick="saveEditBtn()">✓ Save</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+let apiKey=localStorage.getItem('juniperApiKey')||'';
+let claudeKey=localStorage.getItem('juniperClaudeKey')||'';
+let allVoices=[],filteredVoices=[],specialVoices=[];
+let selectedVoiceId=localStorage.getItem('juniperVoiceId')||'';
+let speechSpeed=parseFloat(localStorage.getItem('juniperSpeed')||'0.95');
+let currentAudio=null,isTesting=false;
+let info=JSON.parse(localStorage.getItem('juniperInfo')||'{}');
+let insurances=JSON.parse(localStorage.getItem('juniperInsurances')||'[]');
+let pharmacies=JSON.parse(localStorage.getItem('juniperPharmacies')||'[]');
+let history=JSON.parse(localStorage.getItem('juniperHistory')||'[]');
+let myScripts=JSON.parse(localStorage.getItem('juniperScripts')||'[]');
+let fullScripts=JSON.parse(localStorage.getItem('juniperFullScripts')||JSON.stringify({
+  doctor:[{id:1,name:'Schedule Appointment',text:"Hello, I'm Juniper calling on behalf of [FIRST] [LAST]. We'd like to schedule an appointment. Date of birth is [DOB]."}],
+  pharmacy:[{id:2,name:'Refill Rx',text:"Hello, I'm Juniper calling on behalf of [FIRST] [LAST]. We need to refill a prescription. DOB is [DOB]."}],
+  transport:[{id:3,name:'Schedule Ride',text:"Hello, I'm Juniper calling on behalf of [FIRST] [LAST]. We need a ride. Pickup at [ADDRESS]."}],
+  insurance:[{id:4,name:'Coverage Question',text:"Hello, I'm Juniper calling on behalf of [FIRST] [LAST]. We have a question. Member ID is [INSURANCE]."}],
+  custom:[]
+}));
+let currentCat='doctor';
+let selectedIcon='⭐';
+let editingBtn='';
+let introText=localStorage.getItem('juniperIntroText')||"Hello, I'm Juniper, an AI voice assistant calling on behalf of [FULL_NAME]. [FIRST] can hear you but uses me to communicate. How may I help?";
+let introLabel=localStorage.getItem('juniperIntroLabel')||'"Hello, I\'m Juniper..."';
+let verifyText=localStorage.getItem('juniperVerifyText')||"I'll let [FIRST] verify that directly. [FIRST], go ahead.";
+let verifyLabel=localStorage.getItem('juniperVerifyLabel')||'"Let me verify..."';
+
+window.addEventListener('load',()=>{
+  loadInfoFields();updateHeaderName();updateBtnLabels();
+  if(apiKey){document.getElementById('apiKey').value='••••••';document.getElementById('keyStatus').textContent='✓ Saved';document.getElementById('keyStatus').className='key-status saved';loadVoices();}
+  if(claudeKey){document.getElementById('claudeKey').value='••••••';document.getElementById('claudeStatus').textContent='✓ Saved';document.getElementById('claudeStatus').className='key-status saved';}
+  document.getElementById('speedSlider').value=speechSpeed;
+  document.getElementById('speedValue').textContent=speechSpeed.toFixed(2)+'x';
+  document.getElementById('speedSlider').addEventListener('input',e=>{speechSpeed=parseFloat(e.target.value);document.getElementById('speedValue').textContent=speechSpeed.toFixed(2)+'x';localStorage.setItem('juniperSpeed',speechSpeed);});
+  document.getElementById('customText').addEventListener('keypress',e=>{if(e.key==='Enter')speakCustom();});
+  document.querySelectorAll('.hotkey-btn[data-msg]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.msg)));
+  document.querySelectorAll('.hotkey-btn[data-info]').forEach(b=>b.addEventListener('click',()=>speakInfo(b.dataset.info)));
+  renderMyScripts();renderHistory();renderInsurances();renderPharmacies();renderQuickScripts();
+});
+
+function updateBtnLabels(){document.getElementById('introBtnText').textContent=introLabel;document.getElementById('verifyBtnText').textContent=verifyLabel;}
+function loadInfoFields(){document.getElementById('infoFirstName').value=info.firstName||'';document.getElementById('infoLastName').value=info.lastName||'';document.getElementById('infoNickname').value=info.nickname||'';document.getElementById('infoPronounceFirst').value=info.pronounceFirst||'';document.getElementById('infoPronounceLast').value=info.pronounceLast||'';document.getElementById('infoPronounceNick').value=info.pronounceNick||'';document.getElementById('infoDOB').value=info.dob||'';document.getElementById('infoPhone').value=info.phone||'';document.getElementById('infoAddress1').value=info.address1||'';document.getElementById('infoAddress2').value=info.address2||'';document.getElementById('infoCity').value=info.city||'';document.getElementById('infoState').value=info.state||'';document.getElementById('infoZip').value=info.zip||'';}
+function updateHeaderName(){const n=info.nickname||info.firstName||'';document.getElementById('headerSubtitle').textContent=n?n+"'s AI Voice Assistant":"Your AI Voice Assistant";}
+function getFirstName(){return info.pronounceFirst||info.firstName||'the caller';}
+function getLastName(){return info.pronounceLast||info.lastName||'';}
+function getFullName(){return ((info.pronounceFirst||info.firstName||'')+" "+(info.pronounceLast||info.lastName||'')).trim()||'the caller';}
+function getDisplayName(){return info.pronounceNick||info.nickname||info.pronounceFirst||info.firstName||'the caller';}
+function getFullAddress(){let a=info.address1||'';if(info.address2)a+=', '+info.address2;if(info.city)a+=', '+info.city;if(info.state)a+=', '+info.state;if(info.zip)a+=' '+info.zip;return a||'address not set';}
+function getPrimaryInsurance(){const p=insurances.find(i=>i.type==='Medical')||insurances[0];return p?p.memberId:'not set';}
+function getPrimaryPharmacy(){const p=pharmacies.find(p=>p.primary)||pharmacies[0];return p?p.name:'not set';}
+function toggleCollapse(id){const c=document.getElementById(id+'-content');c.classList.toggle('collapsed');c.previousElementSibling.classList.toggle('collapsed');}
+function showTab(t,btn){document.querySelectorAll('#tab-common,#tab-info,#tab-calls').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.card .tabs .tab').forEach(x=>x.classList.remove('active'));document.getElementById('tab-'+t).classList.add('active');btn.classList.add('active');}
+function showInfoTab(t,btn){document.querySelectorAll('[id^="infoTab-"]').forEach(x=>x.classList.remove('active'));document.querySelectorAll('#infoModal .modal-tab').forEach(x=>x.classList.remove('active'));document.getElementById('infoTab-'+t).classList.add('active');btn.classList.add('active');}
+function openInfoModal(){document.getElementById('infoModal').classList.add('show');loadInfoFields();}
+function closeInfoModal(){document.getElementById('infoModal').classList.remove('show');autoSaveInfo();}
+function openVoiceModal(){document.getElementById('voiceModal').classList.add('show');if(apiKey&&!allVoices.length)loadVoices();}
+function closeVoiceModal(){document.getElementById('voiceModal').classList.remove('show');}
+function openFullScriptsModal(){document.getElementById('fullScriptsModal').classList.add('show');showScriptCategory('doctor',document.querySelector('.script-tab'));}
+function closeFullScriptsModal(){document.getElementById('fullScriptsModal').classList.remove('show');}
+function openAgentsModal(){document.getElementById('agentsModal').classList.add('show');}
+function closeAgentsModal(){document.getElementById('agentsModal').classList.remove('show');}
+function openMyScriptModal(){document.getElementById('myScriptModal').classList.add('show');document.getElementById('myScriptName').value='';document.getElementById('myScriptText').value='';selectedIcon='⭐';document.querySelectorAll('.icon-option').forEach(i=>i.classList.toggle('selected',i.dataset.icon==='⭐'));}
+function closeMyScriptModal(){document.getElementById('myScriptModal').classList.remove('show');}
+function closeAddInsuranceModal(){document.getElementById('addInsuranceModal').classList.remove('show');}
+function closeAddPharmacyModal(){document.getElementById('addPharmacyModal').classList.remove('show');}
+function editIntroBtn(){editingBtn='intro';document.getElementById('editBtnTitle').textContent='Edit Intro';document.getElementById('editBtnLabel').value=introLabel;document.getElementById('editBtnText').value=introText;document.getElementById('editBtnModal').classList.add('show');}
+function editVerifyBtn(){editingBtn='verify';document.getElementById('editBtnTitle').textContent='Edit Verify';document.getElementById('editBtnLabel').value=verifyLabel;document.getElementById('editBtnText').value=verifyText;document.getElementById('editBtnModal').classList.add('show');}
+function closeEditBtnModal(){document.getElementById('editBtnModal').classList.remove('show');}
+function saveEditBtn(){const l=document.getElementById('editBtnLabel').value.trim(),t=document.getElementById('editBtnText').value.trim();if(!l||!t){alert('Fill both');return;}if(editingBtn==='intro'){introLabel=l;introText=t;localStorage.setItem('juniperIntroLabel',l);localStorage.setItem('juniperIntroText',t);}else{verifyLabel=l;verifyText=t;localStorage.setItem('juniperVerifyLabel',l);localStorage.setItem('juniperVerifyText',t);}updateBtnLabels();closeEditBtnModal();}
+function speakIntro(){speak(replacePlaceholders(introText));}
+function speakVerify(){speak(replacePlaceholders(verifyText));}
+function selectIcon(el){document.querySelectorAll('.icon-option').forEach(i=>i.classList.remove('selected'));el.classList.add('selected');selectedIcon=el.dataset.icon;}
+function autoSaveInfo(){info={firstName:document.getElementById('infoFirstName').value.trim(),lastName:document.getElementById('infoLastName').value.trim(),nickname:document.getElementById('infoNickname').value.trim(),pronounceFirst:document.getElementById('infoPronounceFirst').value.trim(),pronounceLast:document.getElementById('infoPronounceLast').value.trim(),pronounceNick:document.getElementById('infoPronounceNick').value.trim(),dob:document.getElementById('infoDOB').value.trim(),phone:document.getElementById('infoPhone').value.trim(),address1:document.getElementById('infoAddress1').value.trim(),address2:document.getElementById('infoAddress2').value.trim(),city:document.getElementById('infoCity').value.trim(),state:document.getElementById('infoState').value.trim(),zip:document.getElementById('infoZip').value.trim()};localStorage.setItem('juniperInfo',JSON.stringify(info));updateHeaderName();}
+function saveInfo(){autoSaveInfo();setStatus('ready','Saved!');}
+function saveApiKey(){const k=document.getElementById('apiKey').value.trim();if(k&&!k.includes('•')){apiKey=k;localStorage.setItem('juniperApiKey',k);document.getElementById('apiKey').value='••••••';document.getElementById('keyStatus').textContent='✓ Saved';document.getElementById('keyStatus').className='key-status saved';loadVoices();}}
+function saveClaudeKey(){const k=document.getElementById('claudeKey').value.trim();if(k&&!k.includes('•')){claudeKey=k;localStorage.setItem('juniperClaudeKey',k);document.getElementById('claudeKey').value='••••••';document.getElementById('claudeStatus').textContent='✓ Saved';document.getElementById('claudeStatus').className='key-status saved';}}
+function addInsurance(){document.getElementById('addInsuranceModal').classList.add('show');['insProvider','insMemberId','insGroup','insPhone','insRxBin','insRxPcn'].forEach(id=>document.getElementById(id).value='');}
+function saveInsurance(){const ins={id:Date.now(),type:document.getElementById('insType').value,provider:document.getElementById('insProvider').value.trim(),memberId:document.getElementById('insMemberId').value.trim(),group:document.getElementById('insGroup').value.trim(),phone:document.getElementById('insPhone').value.trim(),rxBin:document.getElementById('insRxBin').value.trim(),rxPcn:document.getElementById('insRxPcn').value.trim()};if(!ins.provider){alert('Enter provider');return;}insurances.push(ins);localStorage.setItem('juniperInsurances',JSON.stringify(insurances));renderInsurances();closeAddInsuranceModal();}
+function deleteInsurance(id){insurances=insurances.filter(i=>i.id!==id);localStorage.setItem('juniperInsurances',JSON.stringify(insurances));renderInsurances();}
+function renderInsurances(){document.getElementById('insuranceList').innerHTML=insurances.length?insurances.map(i=>'<div class="item-card"><div class="item-card-header"><span class="item-card-title">'+i.type+': '+i.provider+'</span><button class="item-card-delete" onclick="deleteInsurance('+i.id+')">🗑️</button></div><div class="item-card-detail">ID: '+(i.memberId||'-')+'</div><div class="item-card-detail">Group: '+(i.group||'-')+'</div></div>').join(''):'<div class="loading-msg">No insurance</div>';}
+function addPharmacy(){document.getElementById('addPharmacyModal').classList.add('show');['pharmName','pharmLocation','pharmPhone','pharmAddress'].forEach(id=>document.getElementById(id).value='');document.getElementById('pharmPrimary').value='no';}
+function savePharmacy(){const ph={id:Date.now(),name:document.getElementById('pharmName').value.trim(),location:document.getElementById('pharmLocation').value.trim(),phone:document.getElementById('pharmPhone').value.trim(),address:document.getElementById('pharmAddress').value.trim(),primary:document.getElementById('pharmPrimary').value==='yes'};if(!ph.name){alert('Enter name');return;}if(ph.primary)pharmacies.forEach(p=>p.primary=false);pharmacies.push(ph);localStorage.setItem('juniperPharmacies',JSON.stringify(pharmacies));renderPharmacies();closeAddPharmacyModal();}
+function deletePharmacy(id){pharmacies=pharmacies.filter(p=>p.id!==id);localStorage.setItem('juniperPharmacies',JSON.stringify(pharmacies));renderPharmacies();}
+function renderPharmacies(){document.getElementById('pharmacyList').innerHTML=pharmacies.length?pharmacies.map(p=>'<div class="item-card"><div class="item-card-header"><span class="item-card-title">'+p.name+(p.primary?'<span class="primary-tag">Primary</span>':'')+'</span><button class="item-card-delete" onclick="deletePharmacy('+p.id+')">🗑️</button></div><div class="item-card-detail">📞 '+(p.phone||'-')+'</div></div>').join(''):'<div class="loading-msg">No pharmacies</div>';}
+async function loadVoices(){try{const r=await fetch('https://api.elevenlabs.io/v1/voices',{headers:{'xi-api-key':apiKey}});const d=await r.json();allVoices=d.voices.map(v=>({id:v.voice_id,name:v.name,gender:(v.labels?.gender||'').toLowerCase(),accent:(v.labels?.accent||'').toLowerCase()}));specialVoices=allVoices.filter(v=>v.name.toLowerCase().includes('robin')).sort((a,b)=>a.name.localeCompare(b.name));allVoices=allVoices.filter(v=>!v.name.toLowerCase().includes('robin')).sort((a,b)=>a.name.localeCompare(b.name));renderSpecialVoices();filterVoices('all',document.querySelector('.filter-btn'));}catch(e){console.error(e);}}
+function renderSpecialVoices(){const c=document.getElementById('specialVoices');if(!specialVoices.length){c.innerHTML='<div class="loading-msg">No custom voices</div>';return;}c.innerHTML=specialVoices.map(v=>'<div class="special-voice '+(v.id===selectedVoiceId?'selected':'')+'" onclick="selectVoice(\''+v.id+'\')"><div class="voice-name">⭐ '+v.name+'</div><div class="voice-meta">Custom</div></div>').join('');if(!selectedVoiceId&&specialVoices.length)selectVoice(specialVoices[0].id);}
+function filterVoices(f,btn){document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');filteredVoices=f==='all'?allVoices:(f==='female'||f==='male')?allVoices.filter(v=>v.gender===f):allVoices.filter(v=>v.accent.includes(f));renderVoices();}
+function renderVoices(){const g=document.getElementById('voiceGrid');document.getElementById('voiceCount').textContent=filteredVoices.length+' voices';g.innerHTML=filteredVoices.length?filteredVoices.map(v=>'<div class="voice-card '+(v.id===selectedVoiceId?'selected':'')+'" onclick="selectVoice(\''+v.id+'\')"><div class="voice-name">'+v.name+'</div><div class="voice-meta">'+(v.accent||v.gender||'')+'</div></div>').join(''):'<div class="loading-msg">None</div>';}
+function selectVoice(id){selectedVoiceId=id;localStorage.setItem('juniperVoiceId',id);document.querySelectorAll('.voice-card,.special-voice').forEach(c=>c.classList.toggle('selected',c.onclick?.toString().includes(id)));document.getElementById('testBtn').disabled=false;}
+function toggleTest(){if(isTesting){stopSpeaking();document.getElementById('testBtn').textContent='🔊 Test';document.getElementById('testBtn').classList.remove('stop-mode');isTesting=false;}else{isTesting=true;document.getElementById('testBtn').textContent='⏹ Stop';document.getElementById('testBtn').classList.add('stop-mode');speak("Hello! I'm Juniper.",true);}}
+async function speak(text,isTest=false){if(!apiKey||!selectedVoiceId){alert('Add API key and select voice');return;}stopSpeaking();setStatus('loading','Speaking...');try{const r=await fetch('https://api.elevenlabs.io/v1/text-to-speech/'+selectedVoiceId,{method:'POST',headers:{'Accept':'audio/mpeg','Content-Type':'application/json','xi-api-key':apiKey},body:JSON.stringify({text,model_id:'eleven_monolingual_v1',voice_settings:{stability:0.5,similarity_boost:0.75}})});const b=await r.blob();currentAudio=new Audio(URL.createObjectURL(b));currentAudio.playbackRate=speechSpeed;currentAudio.onplay=()=>setStatus('speaking','Speaking...');currentAudio.onended=()=>{setStatus('ready','Ready');if(isTest){document.getElementById('testBtn').textContent='🔊 Test';document.getElementById('testBtn').classList.remove('stop-mode');isTesting=false;}};await currentAudio.play();if(!isTest)addHistory(text);}catch(e){setStatus('error','Error');console.error(e);}}
+function speakInfo(t){const primary=insurances.find(i=>i.type==='Medical')||insurances[0];const pharm=pharmacies.find(p=>p.primary)||pharmacies[0];const p={name:"The name is "+getFullName()+".",dob:"Date of birth is "+(info.dob||'not set')+".",phone:"Phone is "+(info.phone||'not set')+".",address:"Address is "+getFullAddress()+".",insurance:primary?"Insurance is "+primary.provider+", ID "+primary.memberId+(primary.group?", Group "+primary.group:"")+".":'Insurance not set.',pharmacy:pharm?"Pharmacy is "+pharm.name+(pharm.phone?" at "+pharm.phone:"")+".":'Pharmacy not set.'};speak(p[t]);}
+function speakCustom(){const t=document.getElementById('customText').value.trim();if(t){speak(t);document.getElementById('customText').value='';}}
+function stopSpeaking(){if(currentAudio){currentAudio.pause();currentAudio=null;}setStatus('ready','Ready');}
+function setStatus(s,t){document.getElementById('statusDot').className='status-dot '+s;document.getElementById('statusText').textContent=t;}
+function addHistory(t){history.unshift({text:t.slice(0,50)+(t.length>50?'...':''),full:t,time:new Date().toLocaleTimeString()});if(history.length>20)history.pop();localStorage.setItem('juniperHistory',JSON.stringify(history));renderHistory();}
+function renderHistory(){document.getElementById('historyList').innerHTML=history.length?history.map((h,i)=>'<div class="history-item" onclick="document.getElementById(\'customText\').value=history['+i+'].full"><span class="time">'+h.time+'</span> '+h.text+'</div>').join(''):'<p style="color:var(--text-muted);padding:10px;">Messages appear here</p>';}
+function clearHistory(){history=[];localStorage.removeItem('juniperHistory');renderHistory();}
+function renderMyScripts(){document.getElementById('scriptsGrid').innerHTML=myScripts.length?myScripts.map(s=>'<div class="script-card" onclick="speak(`'+s.text.replace(/`/g,'\\`')+'`)"><div class="script-icon">'+(s.icon||'⭐')+'</div><div class="script-name">'+s.name+'</div><div class="script-preview">'+s.text+'</div><button class="delete-script" onclick="event.stopPropagation();deleteMyScript('+s.id+')">✕</button></div>').join(''):'<div class="no-scripts">Tap "+ New"</div>';renderQuickScripts();}
+function renderQuickScripts(){const q=myScripts.filter(s=>s.quick!==false);document.getElementById('quickScripts').innerHTML=q.length?q.map(s=>'<button class="quick-script-btn" onclick="speak(`'+s.text.replace(/`/g,'\\`')+'`)"><span>'+s.icon+'</span>'+s.name+'</button>').join(''):'';}
+function saveMyScript(){const n=document.getElementById('myScriptName').value.trim(),t=document.getElementById('myScriptText').value.trim(),q=document.getElementById('myScriptQuick').value==='yes';if(!n||!t){alert('Fill name and text');return;}myScripts.push({id:Date.now(),name:n,text:t,icon:selectedIcon,quick:q});localStorage.setItem('juniperScripts',JSON.stringify(myScripts));renderMyScripts();closeMyScriptModal();}
+function deleteMyScript(id){myScripts=myScripts.filter(s=>s.id!==id);localStorage.setItem('juniperScripts',JSON.stringify(myScripts));renderMyScripts();}
+function showScriptCategory(cat,btn){currentCat=cat;document.querySelectorAll('.script-tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');renderFullScripts();}
+function replacePlaceholders(t){return t.replace(/\[FIRST\]/g,getFirstName()).replace(/\[LAST\]/g,getLastName()).replace(/\[FULL_NAME\]/g,getFullName()).replace(/\[DOB\]/g,info.dob||'[DOB]').replace(/\[PHONE\]/g,info.phone||'[PHONE]').replace(/\[ADDRESS\]/g,getFullAddress()).replace(/\[INSURANCE\]/g,getPrimaryInsurance()).replace(/\[PHARMACY\]/g,getPrimaryPharmacy()).replace(/\[NAME\]/g,getFullName());}
+function renderFullScripts(){const list=fullScripts[currentCat]||[];document.getElementById('scriptList').innerHTML=list.length?list.map(s=>'<div class="script-item"><div class="script-item-header"><span class="script-item-title">'+s.name+'</span><div><button class="script-item-btn" onclick="speakFullScript('+s.id+')">▶️</button><button class="script-item-btn" onclick="deleteFullScript('+s.id+')">🗑️</button></div></div><div class="script-item-text">'+replacePlaceholders(s.text)+'</div></div>').join(''):'<div class="loading-msg">No scripts</div>';}
+function speakFullScript(id){const s=(fullScripts[currentCat]||[]).find(x=>x.id===id);if(s)speak(replacePlaceholders(s.text));}
+function deleteFullScript(id){fullScripts[currentCat]=fullScripts[currentCat].filter(s=>s.id!==id);localStorage.setItem('juniperFullScripts',JSON.stringify(fullScripts));renderFullScripts();}
+function showCreateScriptView(){document.getElementById('browseScriptsView').style.display='none';document.getElementById('createScriptView').classList.add('active');}
+function hideCreateScriptView(){document.getElementById('browseScriptsView').style.display='block';document.getElementById('createScriptView').classList.remove('active');}
+async function generateScriptAI(){const desc=document.getElementById('scriptDescribe').value.trim();if(!desc){alert('Describe what you need');return;}if(!claudeKey){alert('Add Claude key');return;}document.getElementById('generatedScript').value='Generating...';try{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':claudeKey,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,messages:[{role:'user',content:"Write a phone script. Need: "+desc+"\n\nStart with \"Hello, I'm Juniper calling on behalf of [FIRST] [LAST].\" Use [FIRST], [LAST], [FULL_NAME], [DOB], [ADDRESS], [INSURANCE], [PHARMACY]. Keep concise."}]})});const d=await r.json();document.getElementById('generatedScript').value=d.content[0].text;}catch(e){document.getElementById('generatedScript').value='Error: '+e.message;}}
+function saveFullScript(){const n=document.getElementById('newScriptName').value.trim(),t=document.getElementById('generatedScript').value.trim(),cat=document.getElementById('newScriptCat').value;if(!n||!t){alert('Fill name and text');return;}fullScripts[cat].push({id:Date.now(),name:n,text:t});localStorage.setItem('juniperFullScripts',JSON.stringify(fullScripts));hideCreateScriptView();renderFullScripts();}
+function toggleSetting(s){document.getElementById('toggle'+s.charAt(0).toUpperCase()+s.slice(1)).classList.toggle('active');}
+</script>
+</body>
+</html>
