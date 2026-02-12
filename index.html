@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="src/css/voice.css">
   <link rel="stylesheet" href="src/css/scripts.css">
   <link rel="stylesheet" href="src/css/agents.css">
+  <link rel="stylesheet" href="src/css/image.css">
 </head>
 <body>
   <div class="container">
@@ -38,6 +39,35 @@
           <span class="status-text" id="statusText">Ready</span>
         </div>
         <button class="stop-btn" onclick="stopSpeaking()" title="Stop speaking">STOP</button>
+      </div>
+    </div>
+
+    <!-- AI Image Card -->
+    <div class="card">
+      <div class="collapse-header" onclick="toggleCollapse('image')">
+        <h2 style="margin:0;">🖼️ AI Image</h2>
+        <span class="arrow">▼</span>
+      </div>
+      <div id="image-content" class="collapse-content collapsed">
+        <div style="margin-top:10px;">
+          <input type="file" id="imageFileInput" accept="image/*" style="display:none" onchange="handleImageSelect(event)">
+          <div class="image-drop-zone" id="imageDropZone"
+               onclick="openImageUpload()"
+               ondrop="handleImageDrop(event)"
+               ondragover="handleImageDragOver(event)"
+               ondragleave="handleImageDragLeave(event)">
+            <span class="drop-icon">📷</span>
+            <span class="drop-text">Tap to upload or drag an image</span>
+            <span class="drop-hint">Juniper will describe it aloud</span>
+          </div>
+          <div class="image-preview" id="imagePreview"></div>
+          <div class="image-actions" id="imageActions">
+            <button class="img-btn describe" id="describeBtn" onclick="describeImage()">🔍 Describe</button>
+            <button class="img-btn speak-img" id="speakImageBtn" onclick="speakImageDescription()">🔊 Speak</button>
+            <button class="img-btn clear" onclick="clearImage()">✕ Clear</button>
+          </div>
+          <div class="image-description" id="imageDescription"></div>
+        </div>
       </div>
     </div>
 
@@ -380,5 +410,6 @@
   <script src="src/js/ui.js"></script>
   <script src="src/js/scripts.js"></script>
   <script src="src/js/data.js"></script>
+  <script src="src/js/image.js"></script>
 </body>
 </html>
