@@ -16,3 +16,12 @@ Thumbs.db
 # Build
 dist/
 build/
+
+# Local-only media and credentials — never commit
+# Holds personal voice recordings plus live secrets (a Twilio 2FA recovery
+# code and a stray .env). Kept on disk deliberately; ignored so a stray
+# `git add .` can't publish it.
+Juniper Voice Assistant Audio/
+*2FA*recovery*
+*recovery_code*
+_env*.txt
