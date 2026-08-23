@@ -1,4 +1,4 @@
-/* Juniper v6.2.1 - Modal Styles */
+/* Juniper v6.3.1 - Modal Styles */
 
 /* Modal Overlay */
 .modal-overlay {
@@ -256,6 +256,41 @@
 .modal-btn.save {
   background: linear-gradient(135deg, var(--accent-success), #5a8a4a);
   color: white;
+}
+
+.info-tab-content {
+  display: none;
+}
+
+.info-tab-content.active {
+  display: block;
+}
+
+.modal-btn.full {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.privacy-note {
+  margin: 12px 0;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.preview-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  vertical-align: middle;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 /* API Row */

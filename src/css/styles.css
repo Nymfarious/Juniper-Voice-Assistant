@@ -1,19 +1,19 @@
-/* Juniper v6.3.0 - Forest Theme */
+/* Juniper v6.3.1 - Forest Theme */
 
 :root {
   --bg-primary: #1a2418;
   --bg-secondary: #2d3a29;
   --bg-card: rgba(45, 58, 41, 0.95);
   --bg-input: rgba(0, 0, 0, 0.25);
-  --accent-primary: #5d8a4a;
+  --accent-primary: #456f38;
   --accent-secondary: #8fbc7a;
   --accent-warm: #a67c52;
-  --accent-success: #6b9b5a;
+  --accent-success: #4f7d40;
   --accent-info: #7ab8a8;
-  --accent-danger: #c45c4a;
+  --accent-danger: #a84434;
   --text-primary: #e8efe6;
   --text-secondary: #b5c4b0;
-  --text-muted: #6b7d66;
+  --text-muted: #a8b5a3;
   --border-color: rgba(255, 255, 255, 0.08);
   --border-accent: rgba(93, 138, 74, 0.4);
 }
@@ -104,6 +104,13 @@ header p {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.collapse-toggle {
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 8px;
   cursor: pointer;
 }
 
@@ -113,7 +120,7 @@ header p {
   transition: transform 0.3s;
 }
 
-.collapse-header.collapsed .arrow {
+.collapse-toggle[aria-expanded="false"] .arrow {
   transform: rotate(-90deg);
 }
 
@@ -443,7 +450,7 @@ header p {
 }
 
 .script-card {
-  padding: 12px;
+  padding: 0;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 8px;
@@ -451,22 +458,37 @@ header p {
   position: relative;
 }
 
+.script-card-content {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  padding-right: 34px;
+  color: var(--text-primary);
+  text-align: left;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
 .script-card:hover {
   border-color: var(--accent-primary);
 }
 
 .script-card .script-icon {
+  display: block;
   font-size: 1.2rem;
   margin-bottom: 4px;
 }
 
 .script-card .script-name {
+  display: block;
   font-weight: 600;
   font-size: 0.85rem;
   margin-bottom: 4px;
 }
 
 .script-card .script-preview {
+  display: block;
   font-size: 0.7rem;
   color: var(--text-muted);
   white-space: nowrap;
@@ -491,7 +513,8 @@ header p {
   justify-content: center;
 }
 
-.script-card:hover .delete-script {
+.script-card:hover .delete-script,
+.script-card:focus-within .delete-script {
   display: flex;
 }
 
@@ -509,6 +532,10 @@ header p {
 }
 
 .history-item {
+  display: block;
+  width: 100%;
+  border: 0;
+  text-align: left;
   padding: 10px;
   background: var(--bg-secondary);
   border-radius: 8px;
@@ -516,6 +543,11 @@ header p {
   cursor: pointer;
   font-size: 0.85rem;
   color: var(--text-secondary);
+}
+
+.empty-message {
+  color: var(--text-muted);
+  padding: 10px;
 }
 
 .history-item:hover {

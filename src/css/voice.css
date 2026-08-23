@@ -1,4 +1,4 @@
-/* Juniper v6.2.1 - Voice Modal Styles */
+/* Juniper v6.3.1 - Voice Modal Styles */
 
 .section-label {
   font-size: 0.75rem;
@@ -45,6 +45,8 @@
   border-radius: 8px;
   cursor: pointer;
   text-align: center;
+  color: var(--text-primary);
+  font-family: inherit;
 }
 
 .voice-card.selected {
@@ -74,6 +76,8 @@
   cursor: pointer;
   text-align: center;
   margin-bottom: 8px;
+  color: var(--text-primary);
+  font-family: inherit;
 }
 
 .special-voice.selected {

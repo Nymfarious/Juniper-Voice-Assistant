@@ -16,6 +16,8 @@ Thumbs.db
 # Build
 dist/
 build/
+test-results/
+playwright-report/
 
 # Local-only media and credentials — never commit
 # Holds personal voice recordings plus live secrets (a Twilio 2FA recovery
