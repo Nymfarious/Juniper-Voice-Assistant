@@ -9,7 +9,6 @@ import {
   signInWithPopup,
   signOut
 } from 'firebase/auth';
-import { ReCaptchaEnterpriseProvider, initializeAppCheck } from 'firebase/app-check';
 import { connectFunctionsEmulator, getFunctions, httpsCallable } from 'firebase/functions';
 
 const testDouble = window.JUNIPER_BACKEND_TEST_DOUBLE;
@@ -31,16 +30,10 @@ if (testDouble) {
   const functions = getFunctions(app, 'us-west1');
   const provider = new GoogleAuthProvider();
   const local = ['127.0.0.1', 'localhost'].includes(window.location.hostname);
-  const appCheckSiteKey = document.querySelector('meta[name="firebase-app-check-site-key"]')?.content.trim();
 
   if (local) {
     connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
     connectFunctionsEmulator(functions, '127.0.0.1', 5001);
-  } else if (appCheckSiteKey) {
-    initializeAppCheck(app, {
-      provider: new ReCaptchaEnterpriseProvider(appCheckSiteKey),
-      isTokenAutoRefreshEnabled: true
-    });
   }
 
   const ready = setPersistence(auth, browserSessionPersistence)

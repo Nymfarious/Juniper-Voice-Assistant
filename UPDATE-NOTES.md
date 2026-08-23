@@ -9,8 +9,9 @@
   key is accepted by or delivered to the browser.
 - Adds Google Standard text-to-speech and built-in device speech as ordered
   fallbacks after ElevenLabs.
-- Adds Google sign-in, a three-user Firestore allowlist, App Check enforcement,
-  deny-by-default client rules, and per-user/global monthly usage ceilings.
+- Adds Google sign-in, a three-user Firestore allowlist, deny-by-default client
+  rules, and per-user/global monthly usage ceilings. App Check remains off by
+  owner choice while the audience is limited.
 - Moves profile, medical, pharmacy, insurance, and history data to the browser
   session and adds an explicit clear-private-data control.
 - Marks Scribe, Smart Response, and server-side AI generation as previews.
@@ -26,7 +27,7 @@
 
 - Approve the permanent `us-west1` Firestore location and create the database.
 - Explicitly link the dedicated Firebase project to Blaze, enable Text-to-Speech,
-  configure App Check and the ElevenLabs secret, and set billing alerts/caps.
+  configure the ElevenLabs secret, and set billing alerts/caps.
 - Add the three authorized users and prove ElevenLabs → Google → device fallback
   in the emulator and public origin before listing Juniper as launchable.
 - Approve Mini Mantis consent, retention, KNOX sampling, authentication, and

@@ -8,8 +8,8 @@ only after Shannon approves it.
 ## Cost envelope
 
 - Exactly three Google accounts are allowlisted in `authorizedUsers/{uid}`.
-- Functions use `minInstances: 0`, `maxInstances: 1`, 256 MiB, a 30-second
-  timeout, and App Check outside the emulator.
+- Functions use `minInstances: 0`, `maxInstances: 1`, 256 MiB, and a 30-second
+  timeout. App Check/captcha is intentionally off for the initial three users.
 - Speech is limited to 400 characters per request, 500 requests and 100,000
   characters per user per month, and 250,000 characters globally per month.
 - Google fallback is restricted to `en-US-Standard-*`; Neural2, WaveNet, Studio,
@@ -29,9 +29,8 @@ that Functions deployments can create small container-storage charges.
    Add a very low budget alert and, if the billing account is eligible, a spend
    cap. Confirm no unrelated services are enabled.
 3. Enable Cloud Text-to-Speech. Keep the code's Standard-only voice validation.
-4. Create a reCAPTCHA Enterprise App Check key for the public Juniper hostname,
-   put its public site key in the HTML meta tag, and register the same hostname
-   as an authorized Firebase Authentication domain.
+4. Register the public Juniper hostname as an authorized Firebase Authentication
+   domain. App Check can be reconsidered if public usage materially grows.
 5. Store the ElevenLabs credential as the `ELEVENLABS_API_KEY` Functions secret.
    Scope and cap it in ElevenLabs if that account supports limits.
 6. Have each of the three users sign in once, then create
@@ -47,8 +46,8 @@ that Functions deployments can create small container-storage charges.
    and monthly-limit rejection.
 3. Deploy Functions and Firestore rules only after the setup above is complete.
    Do not deploy the public page yet.
-4. On a temporary approved origin, prove Google sign-in and App Check, then play
-   a short ElevenLabs phrase.
+4. On a temporary approved origin, prove Google sign-in, then play a short
+   ElevenLabs phrase.
 5. Temporarily make ElevenLabs unavailable and prove the same request returns a
    Google Standard voice. Then make both cloud providers unavailable and prove
    the browser/device voice still speaks.

@@ -71,8 +71,10 @@ Open <http://127.0.0.1:4173>.
 
 The dedicated Firebase project is `juniper-voice-assistant-nym`. The repository
 contains Functions, Firestore rules, emulator configuration, and a bundled
-Firebase browser client. The project is intentionally not deployed or linked
-to billing by this branch.
+Firebase browser client. App Check/captcha is intentionally off while usage is
+limited to three allowlisted accounts; it can be added later without changing
+the voice-provider contract. The project is intentionally not deployed or
+linked to billing by this branch.
 
 ```bash
 npm ci

@@ -18,7 +18,9 @@ const callableOptions = {
   minInstances: 0,
   maxInstances: 1,
   concurrency: 8,
-  enforceAppCheck: process.env.FUNCTIONS_EMULATOR !== 'true',
+  // Intentionally disabled while Juniper has only three approved users.
+  // Authentication, the Firestore allowlist, and usage ceilings remain active.
+  enforceAppCheck: false,
   secrets: [elevenLabsApiKey]
 };
 
