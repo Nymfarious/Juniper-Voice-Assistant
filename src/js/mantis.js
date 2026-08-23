@@ -21,7 +21,7 @@ const MiniMantis = (() => {
     sampleRate: 1,
     ...(window.JUNIPER_MANTIS_CONFIG || {})
   });
-  const sessionId = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const sessionId = crypto.randomUUID();
 
   function safeDetails(details) {
     return Object.fromEntries(Object.entries(details || {})
