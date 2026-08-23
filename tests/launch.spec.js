@@ -10,7 +10,7 @@ test('launches without runtime errors and exposes working settings tabs', async 
   const dialog = page.getByRole('dialog', { name: 'My Info' });
   await expect(dialog).toBeVisible();
   await page.getByRole('tab', { name: 'API' }).click();
-  await expect(page.getByText(/held in memory only/)).toBeVisible();
+  await expect(page.getByText(/Provider keys stay on the Firebase backend/)).toBeVisible();
   await page.getByRole('button', { name: 'Close My Info' }).click();
   expect(errors).toEqual([]);
 });
@@ -44,19 +44,14 @@ test('renders stored user content as text rather than executable HTML', async ({
   await expect(page.getByText('<svg onload="window.__xss=true"></svg>', { exact: true })).toBeAttached();
 });
 
-test('keeps private profile data and API keys out of persistent storage', async ({ page }) => {
-  await page.route('https://api.elevenlabs.io/v1/voices', route => route.fulfill({
-    status: 200,
-    contentType: 'application/json',
-    body: JSON.stringify({ voices: [] })
-  }));
+test('keeps private profile data and legacy API keys out of persistent storage', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('juniperApiKey', 'legacy-test-key'));
   await page.goto('/');
   await page.getByRole('button', { name: 'Info' }).click();
   await page.getByLabel('First Name').fill('Private test');
   await page.getByRole('button', { name: 'Save Info' }).click();
   await page.getByRole('tab', { name: 'API' }).click();
-  await page.getByLabel('ElevenLabs API Key').fill('test-key');
-  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByLabel('ElevenLabs API Key')).toHaveCount(0);
   const storage = await page.evaluate(() => ({
     localInfo: localStorage.getItem('juniperInfo'),
     localKey: localStorage.getItem('juniperApiKey'),
@@ -68,22 +63,22 @@ test('keeps private profile data and API keys out of persistent storage', async 
 });
 
 test('handles the ElevenLabs voice catalog boundary and safely renders provider data', async ({ page }) => {
-  await page.route('https://api.elevenlabs.io/v1/voices', route => route.fulfill({
-    status: 200,
-    contentType: 'application/json',
-    body: JSON.stringify({ voices: [{
-      voice_id: 'voice-1',
-      name: '<img src=x onerror="window.__voiceXss=true">Juniper Test',
-      labels: { gender: 'female', accent: 'american' }
-    }] })
-  }));
+  await page.addInitScript(() => {
+    window.JUNIPER_BACKEND_TEST_DOUBLE = {
+      ready: Promise.resolve(),
+      currentUser: () => ({ email: 'approved@example.com' }),
+      signIn: async () => ({ email: 'approved@example.com' }),
+      signOut: async () => {},
+      listVoices: async () => ({ voices: [{
+        provider: 'elevenlabs',
+        id: 'voice-1',
+        name: '<img src=x onerror="window.__voiceXss=true">Juniper Test',
+        gender: 'female'
+      }] }),
+      synthesize: async () => ({ provider: 'google', audioBase64: '', contentType: 'audio/mpeg' })
+    };
+  });
   await page.goto('/');
-  await page.getByRole('button', { name: 'Info' }).click();
-  await page.getByRole('tab', { name: 'API' }).click();
-  await page.getByLabel('ElevenLabs API Key').fill('test-key');
-  await page.locator('#info-api').getByRole('button', { name: 'Save' }).click();
-  await expect(page.getByText('Available until this page reloads')).toBeVisible();
-  await page.getByRole('button', { name: 'Close My Info' }).click();
   await page.locator('.toolbar-btn').filter({ hasText: 'Voice' }).click();
   await expect(page.getByText('<img src=x onerror="window.__voiceXss=true">Juniper Test', { exact: true })).toBeVisible();
   expect(await page.evaluate(() => window.__voiceXss)).toBeUndefined();
@@ -96,10 +91,10 @@ test('queues only allowlisted Mini Mantis diagnostics while delivery is disabled
   expect(queue[0]).toMatchObject({
     schemaVersion: '1.0',
     appId: 'juniper-voice-assistant',
-    appVersion: '6.3.1',
+    appVersion: '6.4.0',
     event: 'app_loaded',
     outcome: 'ok',
-    details: { version: '6.3.1' }
+    details: { version: '6.4.0' }
   });
   expect(JSON.stringify(queue[0])).not.toMatch(/message|script|name|address|insurance|apiKey|voiceId|audio/i);
 });

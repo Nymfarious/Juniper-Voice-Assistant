@@ -1,4 +1,4 @@
-// Juniper v6.3.1 - User Info Helpers
+// Juniper v6.4.0 - User Info Helpers
 
 function readStoredJson(storage, key, fallback) {
   try {
@@ -132,15 +132,32 @@ function saveInfo() {
 // ============================================
 // API KEYS
 // ============================================
-function saveApiKey() {
-  const k = document.getElementById('apiKey').value.trim();
-  if (k && !k.includes('•')) {
-    state.apiKey = k;
-    document.getElementById('apiKey').value = '••••••';
-    document.getElementById('keyStatus').textContent = '✓ Available until this page reloads';
-    document.getElementById('keyStatus').className = 'key-status saved';
-    loadVoices();
+function updateBackendStatus(message = '') {
+  const status = document.getElementById('backendAuthStatus');
+  const user = window.JuniperBackend?.currentUser?.();
+  if (status && message) status.textContent = message;
+  else if (status) status.textContent = user ? `Signed in as ${user.email || 'approved user'}` : 'Not signed in';
+}
+
+async function signInToBackend() {
+  try {
+    await window.JuniperBackend?.signIn();
+    await loadVoices();
+  } catch (error) {
+    updateBackendStatus(error.message || 'Google sign-in failed');
   }
+}
+
+async function signOutOfBackend() {
+  await window.JuniperBackend?.signOut();
+  state.allVoices = [];
+  state.specialVoices = [];
+  state.filteredVoices = [];
+  state.selectedVoiceProvider = 'device';
+  state.selectedVoiceId = 'device-default';
+  localStorage.setItem('juniperVoiceProvider', 'device');
+  localStorage.setItem('juniperVoiceId', 'device-default');
+  updateBackendStatus();
 }
 
 function clearPrivateData() {

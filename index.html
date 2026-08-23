@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="firebase-app-check-site-key" content="">
   <title>Juniper Voice Assistant</title>
   
   <!-- Favicon -->
@@ -22,7 +23,7 @@
     <header>
       <h1><div class="juniper-icon">🌿</div> Juniper</h1>
       <p id="headerSubtitle">Your Voice Assistant</p>
-      <div class="version">v6.3.1</div>
+      <div class="version">v6.4.0</div>
     </header>
 
     <!-- Type Anything Card -->
@@ -122,7 +123,7 @@
       </div>
     </div>
 
-    <div class="footer">🌿 Juniper v6.3.1</div>
+    <div class="footer">🌿 Juniper v6.4.0</div>
   </div>
 
   <!-- ==================== MODALS ==================== -->
@@ -171,14 +172,15 @@
       </div>
       <div id="info-api" class="info-tab-content">
         <div class="form-group">
-          <label>ElevenLabs API Key</label>
+          <h4>Cloud voices</h4>
+          <p class="privacy-note">Sign in with one of the three approved Google accounts. Provider keys stay on the Firebase backend.</p>
           <div class="api-row">
-            <input type="password" id="apiKey" placeholder="xi_...">
-            <button class="modal-btn save" onclick="saveApiKey()">Save</button>
+            <button class="modal-btn save" id="backendSignIn" onclick="signInToBackend()">Sign in with Google</button>
+            <button class="modal-btn cancel" id="backendSignOut" onclick="signOutOfBackend()" hidden>Sign out</button>
           </div>
-          <div class="key-status" id="keyStatus">Not set</div>
+          <div class="key-status" id="backendAuthStatus" role="status" aria-live="polite">Checking sign-in…</div>
         </div>
-        <p class="privacy-note">The ElevenLabs key is held in memory only and is removed on reload. AI script generation is unavailable until Juniper has a secure server proxy.</p>
+        <p class="privacy-note">Voice order: ElevenLabs, Google Standard, then the device voice. Cloud usage has hard monthly ceilings; device speech is always free.</p>
       </div>
     </div>
   </div>
@@ -370,6 +372,7 @@
   </div>
 
   <!-- JavaScript Files -->
+  <script src="src/js/firebase-client.js"></script>
   <script src="src/js/helpers.js"></script>
   <script src="src/js/mantis.js"></script>
   <script src="src/js/app.js"></script>

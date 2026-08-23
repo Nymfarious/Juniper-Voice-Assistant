@@ -1,81 +1,103 @@
-// Juniper v6.3.1 - Speech & Voice
+// Juniper v6.4.0 - Speech & Voice
 
-const ELEVENLABS_MODEL_ID = 'eleven_multilingual_v2';
+const DEVICE_VOICE = Object.freeze({
+  id: 'device-default',
+  provider: 'device',
+  name: 'Device voice',
+  gender: '',
+  accent: 'built in'
+});
 
-async function responseError(response) {
-  try {
-    const data = await response.json();
-    return data.detail?.message || data.detail || data.message || `Request failed (${response.status})`;
-  } catch {
-    return `Request failed (${response.status})`;
-  }
-}
-
-// ============================================
-// STATUS
-// ============================================
 function setStatus(status, text) {
   document.getElementById('statusDot').className = 'status-dot ' + status;
   document.getElementById('statusText').textContent = text;
 }
 
-// ============================================
-// SPEECH
-// ============================================
-async function speak(text, isTest = false) {
-  if (!state.apiKey || !state.selectedVoiceId) {
-    alert('Add API key and select voice');
+function resetTestButton() {
+  if (!state.isTesting) return;
+  document.getElementById('testBtn').textContent = '🔊 Test';
+  document.getElementById('testBtn').classList.remove('stop-mode');
+  state.isTesting = false;
+}
+
+function completeSpeech(text, isTest, provider) {
+  setStatus('ready', `Ready · ${provider}`);
+  MiniMantis.report('speech_request', 'ok', { provider });
+  if (!isTest) addHistory(text);
+  resetTestButton();
+}
+
+function base64Audio(base64, contentType) {
+  const bytes = Uint8Array.from(atob(base64), character => character.charCodeAt(0));
+  return new Blob([bytes], { type: contentType || 'audio/mpeg' });
+}
+
+async function playCloudAudio(result, text, isTest) {
+  const blob = base64Audio(result.audioBase64, result.contentType);
+  const audioUrl = URL.createObjectURL(blob);
+  state.currentAudio = new Audio(audioUrl);
+  state.currentAudio.playbackRate = state.speechSpeed;
+  state.currentAudio.onplay = () => setStatus('speaking', `Speaking · ${result.provider}`);
+  state.currentAudio.onended = () => {
+    URL.revokeObjectURL(audioUrl);
+    state.currentAudio = null;
+    completeSpeech(text, isTest, result.provider);
+  };
+  state.currentAudio.onerror = () => {
+    URL.revokeObjectURL(audioUrl);
+    state.currentAudio = null;
+    speakWithDeviceVoice(text, isTest);
+  };
+  await state.currentAudio.play();
+}
+
+function speakWithDeviceVoice(text, isTest = false) {
+  if (!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined') {
+    setStatus('error', 'No voice provider is available');
+    resetTestButton();
     return;
   }
-  
-  stopSpeaking();
-  setStatus('loading', 'Speaking...');
-  
-  try {
-    MiniMantis.report('speech_request', 'started');
-    const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + state.selectedVoiceId, {
-      method: 'POST',
-      headers: {
-        'Accept': 'audio/mpeg',
-        'Content-Type': 'application/json',
-        'xi-api-key': state.apiKey
-      },
-      body: JSON.stringify({
-        text,
-        model_id: ELEVENLABS_MODEL_ID,
-        voice_settings: {
-          stability: 0.5,
-          similarity_boost: 0.75
-        }
-      })
-    });
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = state.speechSpeed;
+  utterance.onstart = () => setStatus('speaking', 'Speaking · device');
+  utterance.onend = () => {
+    state.currentUtterance = null;
+    completeSpeech(text, isTest, 'device');
+  };
+  utterance.onerror = () => {
+    state.currentUtterance = null;
+    setStatus('error', 'Device voice failed');
+    resetTestButton();
+  };
+  state.currentUtterance = utterance;
+  window.speechSynthesis.speak(utterance);
+}
 
-    if (!response.ok) throw new Error(await responseError(response));
-    
-    const blob = await response.blob();
-    const audioUrl = URL.createObjectURL(blob);
-    state.currentAudio = new Audio(audioUrl);
-    state.currentAudio.playbackRate = state.speechSpeed;
-    
-    state.currentAudio.onplay = () => setStatus('speaking', 'Speaking...');
-    state.currentAudio.onended = () => {
-      URL.revokeObjectURL(audioUrl);
-      setStatus('ready', 'Ready');
-      MiniMantis.report('speech_request', 'ok');
-      if (isTest) {
-        document.getElementById('testBtn').textContent = '🔊 Test';
-        document.getElementById('testBtn').classList.remove('stop-mode');
-        state.isTesting = false;
-      }
-    };
-    
-    await state.currentAudio.play();
-    if (!isTest) addHistory(text);
-    
-  } catch (e) {
-    setStatus('error', e.message || 'Voice request failed');
+async function speak(text, isTest = false) {
+  if (!state.selectedVoiceId) selectVoice('device-default', 'device');
+  stopSpeaking();
+  setStatus('loading', 'Preparing voice…');
+  MiniMantis.report('speech_request', 'started');
+
+  if (state.selectedVoiceProvider === 'device' || !window.JuniperBackend?.synthesize) {
+    speakWithDeviceVoice(text, isTest);
+    return;
+  }
+
+  try {
+    const result = await window.JuniperBackend.synthesize({
+      text,
+      provider: 'auto',
+      elevenLabsVoiceId: state.selectedVoiceProvider === 'elevenlabs' ? state.selectedVoiceId : '',
+      googleVoice: state.selectedVoiceProvider === 'google' ? state.selectedVoiceId : 'en-US-Standard-C',
+      speed: state.speechSpeed
+    });
+    await playCloudAudio(result, text, isTest);
+  } catch (error) {
+    console.warn('Cloud voices unavailable; using device voice.', error);
     MiniMantis.report('speech_request', 'error', { errorKind: 'provider_request' });
-    console.error(e);
+    speakWithDeviceVoice(text, isTest);
   }
 }
 
@@ -84,12 +106,11 @@ function stopSpeaking() {
     state.currentAudio.pause();
     state.currentAudio = null;
   }
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  state.currentUtterance = null;
   setStatus('ready', 'Ready');
 }
 
-// ============================================
-// SPEAK HELPERS
-// ============================================
 function speakCustom() {
   const text = document.getElementById('customText').value.trim();
   if (text) {
@@ -107,141 +128,125 @@ function speakVerify() {
 }
 
 function speakInfo(type) {
-  const primary = state.insurances.find(i => i.type === 'Medical') || state.insurances[0];
-  const pharm = state.pharmacies.find(p => p.primary) || state.pharmacies[0];
-  
+  const primary = state.insurances.find(insurance => insurance.type === 'Medical') || state.insurances[0];
+  const pharmacy = state.pharmacies.find(item => item.primary) || state.pharmacies[0];
   const phrases = {
-    name: "The name is " + getFullName() + ".",
-    dob: "Date of birth is " + (state.info.dob || 'not set') + ".",
-    phone: "Phone is " + (state.info.phone || 'not set') + ".",
-    address: "Address is " + getFullAddress() + ".",
-    insurance: primary 
-      ? "Insurance is " + primary.provider + ", ID " + primary.memberId + 
-        (primary.group ? ", Group " + primary.group : "") + "."
+    name: `The name is ${getFullName()}.`,
+    dob: `Date of birth is ${state.info.dob || 'not set'}.`,
+    phone: `Phone is ${state.info.phone || 'not set'}.`,
+    address: `Address is ${getFullAddress()}.`,
+    insurance: primary
+      ? `Insurance is ${primary.provider}, ID ${primary.memberId}${primary.group ? `, Group ${primary.group}` : ''}.`
       : 'Insurance not set.',
-    pharmacy: pharm 
-      ? "Pharmacy is " + pharm.name + (pharm.phone ? " at " + pharm.phone : "") + "."
+    pharmacy: pharmacy
+      ? `Pharmacy is ${pharmacy.name}${pharmacy.phone ? ` at ${pharmacy.phone}` : ''}.`
       : 'Pharmacy not set.'
   };
-  
   speak(phrases[type]);
 }
 
-// ============================================
-// VOICE LOADING
-// ============================================
 async function loadVoices() {
+  const deviceVoice = { ...DEVICE_VOICE };
   try {
-    const response = await fetch('https://api.elevenlabs.io/v1/voices', {
-      headers: { 'xi-api-key': state.apiKey }
-    });
-    if (!response.ok) throw new Error(await responseError(response));
-    const data = await response.json();
-    if (!Array.isArray(data.voices)) throw new Error('Voice provider returned an invalid response');
-    
-    state.allVoices = data.voices.map(v => ({
-      id: v.voice_id,
-      name: v.name,
-      gender: (v.labels?.gender || '').toLowerCase(),
-      accent: (v.labels?.accent || '').toLowerCase()
+    await window.JuniperBackend?.ready;
+    const user = window.JuniperBackend?.currentUser?.();
+    if (!user) throw new Error('Sign in for ElevenLabs and Google voices.');
+    const result = await window.JuniperBackend.listVoices();
+    if (!Array.isArray(result.voices)) throw new Error('Voice backend returned an invalid response.');
+    const cloudVoices = result.voices.map(voice => ({
+      id: voice.id,
+      provider: voice.provider,
+      name: voice.name,
+      gender: (voice.gender || '').toLowerCase(),
+      accent: voice.provider === 'google' ? 'google standard' : 'custom'
     }));
-    
-    // Separate special voices (Robin's cloned voices)
-    state.specialVoices = state.allVoices
-      .filter(v => v.name.toLowerCase().includes('robin'))
+    state.specialVoices = cloudVoices
+      .filter(voice => voice.provider === 'elevenlabs' && voice.name.toLowerCase().includes('robin'))
       .sort((a, b) => a.name.localeCompare(b.name));
-    
-    state.allVoices = state.allVoices
-      .filter(v => !v.name.toLowerCase().includes('robin'))
-      .sort((a, b) => a.name.localeCompare(b.name));
-    
-    renderSpecialVoices();
-    filterVoices('all', document.querySelector('.filter-btn'));
-    MiniMantis.report('voice_catalog', 'ok', { resultCount: state.allVoices.length + state.specialVoices.length });
-    
-  } catch (e) {
-    setStatus('error', e.message || 'Could not load voices');
+    state.allVoices = [deviceVoice, ...cloudVoices
+      .filter(voice => !state.specialVoices.some(special => special.id === voice.id))
+      .sort((a, b) => a.name.localeCompare(b.name))];
+    setStatus('ready', 'Cloud voices ready');
+    MiniMantis.report('voice_catalog', 'ok', { resultCount: cloudVoices.length });
+  } catch (error) {
+    state.specialVoices = [];
+    state.allVoices = [deviceVoice];
+    setStatus('ready', 'Device voice available');
     MiniMantis.report('voice_catalog', 'error', { errorKind: 'provider_request' });
-    console.error(e);
+    console.warn(error.message || error);
+  }
+  renderSpecialVoices();
+  filterVoices('all', document.querySelector('.filter-btn'));
+  if (!state.allVoices.some(voice => voice.id === state.selectedVoiceId && voice.provider === state.selectedVoiceProvider)) {
+    selectVoice('device-default', 'device');
   }
 }
 
 function renderSpecialVoices() {
   const container = document.getElementById('specialVoices');
-  
   if (!state.specialVoices.length) {
     replaceChildrenWith(container, [createElement('div', { className: 'loading-msg', text: 'No custom voices' })]);
     return;
   }
-  
   replaceChildrenWith(container, state.specialVoices.map(voice => makeVoiceButton(voice, true)));
-  
-  // Auto-select first special voice if none selected
-  if (!state.selectedVoiceId && state.specialVoices.length) {
-    selectVoice(state.specialVoices[0].id);
-  }
 }
 
-function filterVoices(filter, btn) {
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  
-  if (filter === 'all') {
-    state.filteredVoices = state.allVoices;
-  } else if (filter === 'female' || filter === 'male') {
-    state.filteredVoices = state.allVoices.filter(v => v.gender === filter);
-  } else {
-    state.filteredVoices = state.allVoices.filter(v => v.accent.includes(filter));
-  }
-  
+function filterVoices(filter, button) {
+  document.querySelectorAll('.filter-btn').forEach(item => item.classList.remove('active'));
+  button.classList.add('active');
+  if (filter === 'all') state.filteredVoices = state.allVoices;
+  else if (filter === 'female' || filter === 'male') state.filteredVoices = state.allVoices.filter(voice => voice.gender === filter);
+  else state.filteredVoices = state.allVoices.filter(voice => voice.accent.includes(filter));
   renderVoices();
 }
 
 function renderVoices() {
   const grid = document.getElementById('voiceGrid');
-  document.getElementById('voiceCount').textContent = state.filteredVoices.length + ' voices';
-  
+  document.getElementById('voiceCount').textContent = `${state.filteredVoices.length} voices`;
   replaceChildrenWith(grid, state.filteredVoices.length
     ? state.filteredVoices.map(voice => makeVoiceButton(voice, false))
     : [createElement('div', { className: 'loading-msg', text: 'None' })]);
 }
 
 function makeVoiceButton(voice, special) {
+  const selected = voice.id === state.selectedVoiceId && voice.provider === state.selectedVoiceProvider;
   const button = createElement('button', {
-    className: `${special ? 'special-voice' : 'voice-card'}${voice.id === state.selectedVoiceId ? ' selected' : ''}`,
+    className: `${special ? 'special-voice' : 'voice-card'}${selected ? ' selected' : ''}`,
     type: 'button',
     ariaLabel: `Select ${voice.name} voice`
   }, [
     createElement('span', { className: 'voice-name', text: `${special ? '⭐ ' : ''}${voice.name}` }),
-    createElement('span', { className: 'voice-meta', text: special ? 'Custom' : (voice.accent || voice.gender || '') })
+    createElement('span', { className: 'voice-meta', text: special ? 'ElevenLabs custom' : voice.accent })
   ]);
   button.dataset.voiceId = voice.id;
-  button.addEventListener('click', () => selectVoice(voice.id));
+  button.dataset.voiceProvider = voice.provider;
+  button.setAttribute('aria-pressed', String(selected));
+  button.addEventListener('click', () => selectVoice(voice.id, voice.provider));
   return button;
 }
 
-function selectVoice(id) {
+function selectVoice(id, provider) {
+  const selected = [...state.specialVoices, ...state.allVoices].find(voice => voice.id === id && (!provider || voice.provider === provider));
   state.selectedVoiceId = id;
-  localStorage.setItem('juniperVoiceId', id);
-  
-  document.querySelectorAll('.voice-card, .special-voice').forEach(c => {
-    c.classList.toggle('selected', c.dataset.voiceId === id);
-    c.setAttribute('aria-pressed', String(c.dataset.voiceId === id));
+  state.selectedVoiceProvider = provider || selected?.provider || 'device';
+  localStorage.setItem('juniperVoiceId', state.selectedVoiceId);
+  localStorage.setItem('juniperVoiceProvider', state.selectedVoiceProvider);
+  document.querySelectorAll('.voice-card, .special-voice').forEach(card => {
+    const active = card.dataset.voiceId === state.selectedVoiceId && card.dataset.voiceProvider === state.selectedVoiceProvider;
+    card.classList.toggle('selected', active);
+    card.setAttribute('aria-pressed', String(active));
   });
-  
   document.getElementById('testBtn').disabled = false;
 }
 
 function toggleTest() {
   if (state.isTesting) {
     stopSpeaking();
-    document.getElementById('testBtn').textContent = '🔊 Test';
-    document.getElementById('testBtn').classList.remove('stop-mode');
-    state.isTesting = false;
-  } else {
-    state.isTesting = true;
-    document.getElementById('testBtn').textContent = '⏹ Stop';
-    document.getElementById('testBtn').classList.add('stop-mode');
-    speak("Hello! I'm Juniper.", true);
+    resetTestButton();
+    return;
   }
+  state.isTesting = true;
+  document.getElementById('testBtn').textContent = '⏹ Stop';
+  document.getElementById('testBtn').classList.add('stop-mode');
+  speak("Hello! I'm Juniper.", true);
 }

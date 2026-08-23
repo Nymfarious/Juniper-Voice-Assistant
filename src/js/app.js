@@ -1,20 +1,18 @@
-// Juniper v6.3.1 - App State & Initialization
+// Juniper v6.4.0 - App State & Initialization
 
 // ============================================
 // STATE
 // ============================================
 const state = {
-  // API keys are intentionally memory-only. Persisting them in browser storage
-  // makes a shared-device compromise much more damaging.
-  apiKey: '',
-  
   // Voice
   allVoices: [],
   filteredVoices: [],
   specialVoices: [],
   selectedVoiceId: localStorage.getItem('juniperVoiceId') || '',
+  selectedVoiceProvider: localStorage.getItem('juniperVoiceProvider') || 'device',
   speechSpeed: parseFloat(localStorage.getItem('juniperSpeed') || '0.95'),
   currentAudio: null,
+  currentUtterance: null,
   isTesting: false,
   
   // User Info
@@ -99,7 +97,9 @@ function init() {
   renderPharmacies();
   renderQuickScripts();
 
-  MiniMantis.report('app_loaded', 'ok', { version: '6.3.1' });
+  window.JuniperBackend?.ready?.then(() => updateBackendStatus());
+
+  MiniMantis.report('app_loaded', 'ok', { version: '6.4.0' });
 }
 
 // Run on load
