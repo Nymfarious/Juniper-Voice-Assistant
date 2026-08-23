@@ -1,4 +1,6 @@
-// Juniper v6.2.1 - UI Functions
+// Juniper v6.3.1 - UI Functions
+
+let modalOpener = null;
 
 // ============================================
 // COLLAPSE
@@ -6,7 +8,8 @@
 function toggleCollapse(id) {
   const content = document.getElementById(id + '-content');
   content.classList.toggle('collapsed');
-  content.previousElementSibling.classList.toggle('collapsed');
+  const toggle = document.querySelector(`[aria-controls="${content.id}"]`);
+  if (toggle) toggle.setAttribute('aria-expanded', String(!content.classList.contains('collapsed')));
 }
 
 // ============================================
@@ -17,56 +20,77 @@ function showTab(tab, btn) {
   document.querySelectorAll('.card .tabs .tab').forEach(x => x.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
   btn.classList.add('active');
+  document.querySelectorAll('.card .tabs .tab').forEach(x => x.setAttribute('aria-selected', String(x === btn)));
 }
 
 function showInfoTab(tab, btn) {
-  document.querySelectorAll('[id^="infoTab-"]').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('[id^="info-"]').forEach(x => x.classList.remove('active'));
   document.querySelectorAll('#infoModal .modal-tab').forEach(x => x.classList.remove('active'));
-  document.getElementById('infoTab-' + tab).classList.add('active');
+  document.getElementById('info-' + tab).classList.add('active');
   btn.classList.add('active');
+  document.querySelectorAll('#infoModal .modal-tab').forEach(x => x.setAttribute('aria-selected', String(x === btn)));
 }
 
 // ============================================
 // MODALS
 // ============================================
+function openModal(id) {
+  const overlay = document.getElementById(id);
+  modalOpener = document.activeElement;
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+  document.querySelector('.container').setAttribute('inert', '');
+  overlay.querySelector('.modal-close, button, input, select, textarea')?.focus();
+}
+
+function closeModal(id) {
+  const overlay = document.getElementById(id);
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden', 'true');
+  const remainingOverlay = document.querySelector('.modal-overlay.show');
+  if (!remainingOverlay) document.querySelector('.container').removeAttribute('inert');
+  modalOpener?.focus();
+  modalOpener = null;
+}
+
 function openInfoModal() {
-  document.getElementById('infoModal').classList.add('show');
+  openModal('infoModal');
   loadInfoFields();
 }
 
 function closeInfoModal() {
-  document.getElementById('infoModal').classList.remove('show');
+  closeModal('infoModal');
   autoSaveInfo();
 }
 
 function openVoiceModal() {
-  document.getElementById('voiceModal').classList.add('show');
+  openModal('voiceModal');
   if (state.apiKey && !state.allVoices.length) loadVoices();
 }
 
 function closeVoiceModal() {
-  document.getElementById('voiceModal').classList.remove('show');
+  closeModal('voiceModal');
 }
 
 function openFullScriptsModal() {
-  document.getElementById('fullScriptsModal').classList.add('show');
-  showScriptCategory('doctor', document.querySelector('.script-tab'));
+  openModal('fullScriptsModal');
+  showScriptCategory('doctor', document.querySelector('.script-tabs .modal-tab'));
 }
 
 function closeFullScriptsModal() {
-  document.getElementById('fullScriptsModal').classList.remove('show');
+  closeModal('fullScriptsModal');
 }
 
 function openAgentsModal() {
-  document.getElementById('agentsModal').classList.add('show');
+  openModal('agentsModal');
 }
 
 function closeAgentsModal() {
-  document.getElementById('agentsModal').classList.remove('show');
+  closeModal('agentsModal');
 }
 
 function openMyScriptModal() {
-  document.getElementById('myScriptModal').classList.add('show');
+  openModal('myScriptModal');
   document.getElementById('myScriptName').value = '';
   document.getElementById('myScriptText').value = '';
   state.selectedIcon = '⭐';
@@ -76,15 +100,15 @@ function openMyScriptModal() {
 }
 
 function closeMyScriptModal() {
-  document.getElementById('myScriptModal').classList.remove('show');
+  closeModal('myScriptModal');
 }
 
 function closeAddInsuranceModal() {
-  document.getElementById('addInsuranceModal').classList.remove('show');
+  closeModal('addInsuranceModal');
 }
 
 function closeAddPharmacyModal() {
-  document.getElementById('addPharmacyModal').classList.remove('show');
+  closeModal('addPharmacyModal');
 }
 
 // ============================================
@@ -95,7 +119,7 @@ function editIntroBtn() {
   document.getElementById('editBtnTitle').textContent = 'Edit Intro';
   document.getElementById('editBtnLabel').value = state.introLabel;
   document.getElementById('editBtnText').value = state.introText;
-  document.getElementById('editBtnModal').classList.add('show');
+  openModal('editBtnModal');
 }
 
 function editVerifyBtn() {
@@ -103,11 +127,11 @@ function editVerifyBtn() {
   document.getElementById('editBtnTitle').textContent = 'Edit Verify';
   document.getElementById('editBtnLabel').value = state.verifyLabel;
   document.getElementById('editBtnText').value = state.verifyText;
-  document.getElementById('editBtnModal').classList.add('show');
+  openModal('editBtnModal');
 }
 
 function closeEditBtnModal() {
-  document.getElementById('editBtnModal').classList.remove('show');
+  closeModal('editBtnModal');
 }
 
 function saveEditBtn() {
@@ -122,13 +146,13 @@ function saveEditBtn() {
   if (state.editingBtn === 'intro') {
     state.introLabel = label;
     state.introText = text;
-    localStorage.setItem('juniperIntroLabel', label);
-    localStorage.setItem('juniperIntroText', text);
+    sessionStorage.setItem('juniperIntroLabel', label);
+    sessionStorage.setItem('juniperIntroText', text);
   } else {
     state.verifyLabel = label;
     state.verifyText = text;
-    localStorage.setItem('juniperVerifyLabel', label);
-    localStorage.setItem('juniperVerifyText', text);
+    sessionStorage.setItem('juniperVerifyLabel', label);
+    sessionStorage.setItem('juniperVerifyText', text);
   }
   
   updateBtnLabels();
@@ -149,5 +173,29 @@ function selectIcon(el) {
 // ============================================
 function toggleSetting(setting) {
   const id = 'toggle' + setting.charAt(0).toUpperCase() + setting.slice(1);
-  document.getElementById(id).classList.toggle('active');
+  const button = document.getElementById(id);
+  button.classList.toggle('active');
+  button.setAttribute('aria-pressed', String(button.classList.contains('active')));
 }
+
+document.addEventListener('keydown', event => {
+  const openOverlay = document.querySelector('.modal-overlay.show');
+  if (!openOverlay) return;
+  if (event.key === 'Escape') {
+    openOverlay.querySelector('.modal-close')?.click();
+    return;
+  }
+  if (event.key !== 'Tab') return;
+  const focusable = [...openOverlay.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href]')]
+    .filter(element => element.offsetParent !== null);
+  if (!focusable.length) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+});

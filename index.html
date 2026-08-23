@@ -22,7 +22,7 @@
     <header>
       <h1><div class="juniper-icon">🌿</div> Juniper</h1>
       <p id="headerSubtitle">Your Voice Assistant</p>
-      <div class="version">v6.3.0</div>
+      <div class="version">v6.3.1</div>
     </header>
 
     <!-- Type Anything Card -->
@@ -32,7 +32,7 @@
         <input type="text" class="custom-input" id="customText" placeholder="Type what Juniper should say..." autocomplete="off">
         <button class="send-btn" onclick="speakCustom()" title="Speak the typed text">SPEAK</button>
       </div>
-      <div class="status-bar">
+      <div class="status-bar" role="status" aria-live="polite">
         <div class="status-indicator">
           <div class="status-dot" id="statusDot"></div>
           <span class="status-text" id="statusText">Ready</span>
@@ -52,12 +52,12 @@
         <button class="main-btn verify" onclick="speakVerify()" title="Hand off to verify">🎤 <span id="verifyBtnText">"Let me verify..."</span></button>
         <button class="edit-btn" onclick="editVerifyBtn()" title="Edit">✏️</button>
       </div>
-      <div class="tabs">
-        <button class="tab active" onclick="showTab('common',this)" title="Common phrases">Common</button>
-        <button class="tab" onclick="showTab('info',this)" title="Your info">My Info</button>
-        <button class="tab" onclick="showTab('calls',this)" title="Call phrases">Calls</button>
+      <div class="tabs" role="tablist" aria-label="Phrase groups">
+        <button class="tab active" role="tab" aria-selected="true" aria-controls="tab-common" onclick="showTab('common',this)" title="Common phrases">Common</button>
+        <button class="tab" role="tab" aria-selected="false" aria-controls="tab-info" onclick="showTab('info',this)" title="Your info">My Info</button>
+        <button class="tab" role="tab" aria-selected="false" aria-controls="tab-calls" onclick="showTab('calls',this)" title="Call phrases">Calls</button>
       </div>
-      <div id="tab-common" class="tab-content active">
+      <div id="tab-common" class="tab-content active" role="tabpanel">
         <div class="hotkey-grid">
           <button class="hotkey-btn yes" data-msg="Yes, that is correct." title="Confirm"><span class="icon">✓</span><span class="label">Yes</span><span class="full-text">That is correct</span></button>
           <button class="hotkey-btn no" data-msg="No, that is not correct." title="Deny"><span class="icon">✗</span><span class="label">No</span><span class="full-text">Not correct</span></button>
@@ -67,7 +67,7 @@
           <button class="hotkey-btn" data-msg="Thank you very much." title="Thank"><span class="icon">🙏</span><span class="label">Thanks</span><span class="full-text">Thank you</span></button>
         </div>
       </div>
-      <div id="tab-info" class="tab-content">
+      <div id="tab-info" class="tab-content" role="tabpanel">
         <div class="hotkey-grid">
           <button class="hotkey-btn" data-info="name" title="Full name"><span class="icon">👤</span><span class="label">Name</span><span class="full-text">Full name</span></button>
           <button class="hotkey-btn" data-info="dob" title="Date of birth"><span class="icon">🎂</span><span class="label">DOB</span><span class="full-text">Date of birth</span></button>
@@ -77,7 +77,7 @@
           <button class="hotkey-btn" data-info="pharmacy" title="Pharmacy"><span class="icon">💊</span><span class="label">Pharmacy</span><span class="full-text">Pharmacy</span></button>
         </div>
       </div>
-      <div id="tab-calls" class="tab-content">
+      <div id="tab-calls" class="tab-content" role="tabpanel">
         <div class="hotkey-grid">
           <button class="hotkey-btn" data-msg="I am calling to schedule an appointment." title="Schedule"><span class="icon">📅</span><span class="label">Appointment</span><span class="full-text">Schedule appt</span></button>
           <button class="hotkey-btn" data-msg="I am calling to refill a prescription." title="Refill Rx"><span class="icon">💊</span><span class="label">Refill</span><span class="full-text">Refill prescription</span></button>
@@ -98,11 +98,11 @@
 
     <!-- My Scripts Card -->
     <div class="card">
-      <div class="collapse-header" onclick="toggleCollapse('scripts')">
+      <div class="collapse-header">
         <h2 style="margin:0;">⭐ My Scripts</h2>
         <div style="display:flex;gap:8px;align-items:center;">
           <button class="clear-btn" onclick="event.stopPropagation();openMyScriptModal()" title="New script">+ New</button>
-          <span class="arrow">▼</span>
+          <button class="collapse-toggle" type="button" aria-label="Toggle My Scripts" aria-expanded="false" aria-controls="scripts-content" onclick="toggleCollapse('scripts')"><span class="arrow" aria-hidden="true">▼</span></button>
         </div>
       </div>
       <div id="scripts-content" class="collapse-content collapsed">
@@ -112,33 +112,33 @@
 
     <!-- History Card -->
     <div class="card">
-      <div class="collapse-header" onclick="toggleCollapse('history')">
+      <div class="collapse-header">
         <h2 style="margin:0;flex:1;">📜 History</h2>
         <button class="clear-btn" onclick="event.stopPropagation();clearHistory()" title="Clear">Clear</button>
-        <span class="arrow" style="margin-left:8px;">▼</span>
+        <button class="collapse-toggle" type="button" aria-label="Toggle History" aria-expanded="false" aria-controls="history-content" onclick="toggleCollapse('history')"><span class="arrow" aria-hidden="true">▼</span></button>
       </div>
       <div id="history-content" class="collapse-content collapsed">
         <div class="history-list" id="historyList"><p style="color:var(--text-muted);padding:10px;">Messages appear here</p></div>
       </div>
     </div>
 
-    <div class="footer">🌿 Juniper v6.3.0</div>
+    <div class="footer">🌿 Juniper v6.3.1</div>
   </div>
 
   <!-- ==================== MODALS ==================== -->
 
   <!-- My Info Modal -->
-  <div class="modal-overlay" id="infoModal">
+  <div class="modal-overlay" id="infoModal" role="dialog" aria-modal="true" aria-labelledby="infoModalTitle" aria-hidden="true">
     <div class="modal">
       <div class="modal-header">
-        <h3>⚙️ My Info</h3>
-        <button class="modal-close" onclick="closeInfoModal()">×</button>
+        <h3 id="infoModalTitle">⚙️ My Info</h3>
+        <button class="modal-close" aria-label="Close My Info" onclick="closeInfoModal()">×</button>
       </div>
-      <div class="modal-tabs">
-        <button class="modal-tab active" onclick="showInfoTab('basic',this)">Basic</button>
-        <button class="modal-tab" onclick="showInfoTab('insurance',this)">Insurance</button>
-        <button class="modal-tab" onclick="showInfoTab('pharmacy',this)">Pharmacy</button>
-        <button class="modal-tab" onclick="showInfoTab('api',this)">API</button>
+      <div class="modal-tabs" role="tablist" aria-label="Information settings">
+        <button class="modal-tab active" role="tab" aria-selected="true" onclick="showInfoTab('basic',this)">Basic</button>
+        <button class="modal-tab" role="tab" aria-selected="false" onclick="showInfoTab('insurance',this)">Insurance</button>
+        <button class="modal-tab" role="tab" aria-selected="false" onclick="showInfoTab('pharmacy',this)">Pharmacy</button>
+        <button class="modal-tab" role="tab" aria-selected="false" onclick="showInfoTab('api',this)">API</button>
       </div>
       <div id="info-basic" class="info-tab-content active">
         <div class="form-group"><label>First Name</label><input type="text" id="firstName" placeholder="First"></div>
@@ -157,15 +157,17 @@
           <div class="form-group"><label>State</label><input type="text" id="state"></div>
           <div class="form-group"><label>ZIP</label><input type="text" id="zip"></div>
         </div>
+        <p class="privacy-note">Private information is kept only for this browser session and clears when the browser session ends.</p>
         <button class="modal-btn save full" onclick="saveInfo()">✓ Save Info</button>
+        <button class="modal-btn cancel full" onclick="clearPrivateData()">Clear private data now</button>
       </div>
       <div id="info-insurance" class="info-tab-content">
         <div class="data-list" id="insuranceList"></div>
-        <button class="modal-btn save" onclick="openAddInsuranceModal()">+ Add Insurance</button>
+        <button class="modal-btn save" onclick="addInsurance()">+ Add Insurance</button>
       </div>
       <div id="info-pharmacy" class="info-tab-content">
         <div class="data-list" id="pharmacyList"></div>
-        <button class="modal-btn save" onclick="openAddPharmacyModal()">+ Add Pharmacy</button>
+        <button class="modal-btn save" onclick="addPharmacy()">+ Add Pharmacy</button>
       </div>
       <div id="info-api" class="info-tab-content">
         <div class="form-group">
@@ -176,38 +178,30 @@
           </div>
           <div class="key-status" id="keyStatus">Not set</div>
         </div>
-        <div class="form-group">
-          <label>Claude API Key (optional)</label>
-          <div class="api-row">
-            <input type="password" id="claudeKey" placeholder="sk-ant-...">
-            <button class="modal-btn save" onclick="saveClaudeKey()">Save</button>
-          </div>
-          <div class="key-status" id="claudeStatus">Not set</div>
-        </div>
-        <p style="margin-top:15px;font-size:0.7rem;color:var(--text-muted);">Keys stored locally in your browser only.</p>
+        <p class="privacy-note">The ElevenLabs key is held in memory only and is removed on reload. AI script generation is unavailable until Juniper has a secure server proxy.</p>
       </div>
     </div>
   </div>
 
   <!-- Voice Modal -->
-  <div class="modal-overlay" id="voiceModal">
+  <div class="modal-overlay" id="voiceModal" role="dialog" aria-modal="true" aria-labelledby="voiceModalTitle" aria-hidden="true">
     <div class="modal large">
       <div class="modal-header">
-        <h3>🎤 Voice Settings</h3>
-        <button class="modal-close" onclick="closeVoiceModal()">×</button>
+        <h3 id="voiceModalTitle">🎤 Voice Settings</h3>
+        <button class="modal-close" aria-label="Close Voice Settings" onclick="closeVoiceModal()">×</button>
       </div>
       <div class="voice-section">
         <h4>Your Voices</h4>
         <div class="voice-grid special" id="specialVoices"></div>
       </div>
       <div class="voice-section">
-        <h4>All Voices</h4>
+        <h4>All Voices <span id="voiceCount" class="voice-count" aria-live="polite">0 voices</span></h4>
         <div class="filter-row">
           <button class="filter-btn active" data-filter="all" onclick="filterVoices('all',this)">All</button>
-          <button class="filter-btn" data-filter="female" onclick="filterVoices('female',this)">👩</button>
-          <button class="filter-btn" data-filter="male" onclick="filterVoices('male',this)">👨</button>
-          <button class="filter-btn" data-filter="american" onclick="filterVoices('american',this)">🇺🇸</button>
-          <button class="filter-btn" data-filter="british" onclick="filterVoices('british',this)">🇬🇧</button>
+          <button class="filter-btn" aria-label="Female voices" data-filter="female" onclick="filterVoices('female',this)">👩</button>
+          <button class="filter-btn" aria-label="Male voices" data-filter="male" onclick="filterVoices('male',this)">👨</button>
+          <button class="filter-btn" aria-label="American voices" data-filter="american" onclick="filterVoices('american',this)">🇺🇸</button>
+          <button class="filter-btn" aria-label="British voices" data-filter="british" onclick="filterVoices('british',this)">🇬🇧</button>
         </div>
         <div class="voice-grid" id="voiceGrid"></div>
       </div>
@@ -215,7 +209,7 @@
         <button class="modal-btn" id="testBtn" onclick="toggleTest()">🔊 Test</button>
         <div class="speed-control">
           <span>Speed:</span>
-          <input type="range" id="speedSlider" min="0.8" max="1.2" step="0.05" value="0.95">
+          <input type="range" id="speedSlider" aria-label="Speech speed" min="0.8" max="1.2" step="0.05" value="0.95">
           <span id="speedValue">0.95x</span>
         </div>
       </div>
@@ -223,11 +217,11 @@
   </div>
 
   <!-- Full Scripts Modal -->
-  <div class="modal-overlay" id="fullScriptsModal">
+  <div class="modal-overlay" id="fullScriptsModal" role="dialog" aria-modal="true" aria-labelledby="scriptsModalTitle" aria-hidden="true">
     <div class="modal large">
       <div class="modal-header">
-        <h3>📜 Call Scripts</h3>
-        <button class="modal-close" onclick="closeFullScriptsModal()">×</button>
+        <h3 id="scriptsModalTitle">📜 Call Scripts</h3>
+        <button class="modal-close" aria-label="Close Call Scripts" onclick="closeFullScriptsModal()">×</button>
       </div>
       <div class="modal-tabs script-tabs">
         <button class="modal-tab active" onclick="showScriptsCat('doctor',this)">🏥 Doctor</button>
@@ -242,7 +236,8 @@
       </div>
       <div class="scripts-create" id="scriptsCreate" style="display:none;">
         <div class="form-group"><label>Describe what you need:</label><input type="text" id="scriptDescribe" placeholder="A script to reschedule with the dentist"></div>
-        <button class="modal-btn" onclick="generateScript()">✨ Generate with Smart Features</button>
+        <button class="modal-btn" onclick="generateScript()">Create editable starter</button>
+        <p class="privacy-note">Smart generation is intentionally unavailable until the secure server proxy is ready.</p>
         <div class="form-group"><label>Script:</label><textarea id="scriptTextarea" rows="4" placeholder="Juniper will say this..."></textarea></div>
         <div class="form-row">
           <div class="form-group"><label>Name</label><input type="text" id="scriptName" placeholder="Short name"></div>
@@ -257,53 +252,54 @@
   </div>
 
   <!-- Agents Modal (Renamed Smart Features internally) -->
-  <div class="modal-overlay" id="agentsModal">
+  <div class="modal-overlay" id="agentsModal" role="dialog" aria-modal="true" aria-labelledby="smartModalTitle" aria-hidden="true">
     <div class="modal">
       <div class="modal-header">
-        <h3>🤖 Smart Features</h3>
-        <button class="modal-close" onclick="closeAgentsModal()">×</button>
+        <h3 id="smartModalTitle">🤖 Smart Features <span class="preview-badge">Preview</span></h3>
+        <button class="modal-close" aria-label="Close Smart Features" onclick="closeAgentsModal()">×</button>
       </div>
+      <p class="privacy-note">These panels describe planned features. They do not record calls, summarize conversations, or answer automatically in this release.</p>
       <div class="agent-section">
         <h4>📝 Scribe</h4>
         <div class="agent-description">Creates summaries after calls</div>
-        <div class="setting-row"><div class="setting-info"><div class="setting-label">Auto-summarize</div></div><button class="toggle-switch active" id="toggleSum" onclick="toggleSetting('sum')"></button></div>
-        <div class="setting-row"><div class="setting-info"><div class="setting-label">Extract key info</div></div><button class="toggle-switch active" id="toggleExt" onclick="toggleSetting('ext')"></button></div>
+        <div class="setting-row"><div class="setting-info"><div class="setting-label">Auto-summarize</div></div><button class="toggle-switch" aria-label="Auto-summarize unavailable" aria-pressed="false" disabled></button></div>
+        <div class="setting-row"><div class="setting-info"><div class="setting-label">Extract key info</div></div><button class="toggle-switch" aria-label="Extract key information unavailable" aria-pressed="false" disabled></button></div>
       </div>
       <div class="agent-section">
         <h4>🗣️ Smart Response</h4>
         <div class="agent-description">Auto-answers common questions</div>
-        <div class="setting-row"><div class="setting-info"><div class="setting-label">Enable</div></div><button class="toggle-switch active" id="toggleAuto" onclick="toggleSetting('auto')"></button></div>
+        <div class="setting-row"><div class="setting-info"><div class="setting-label">Enable</div></div><button class="toggle-switch" aria-label="Smart Response unavailable" aria-pressed="false" disabled></button></div>
         <div style="margin-top:10px;font-size:0.75rem;color:var(--text-muted);">Auto-answer:</div>
         <div class="setting-chips">
-          <button class="setting-chip active" onclick="this.classList.toggle('active')">🎂 DOB</button>
-          <button class="setting-chip active" onclick="this.classList.toggle('active')">📱 Phone</button>
-          <button class="setting-chip active" onclick="this.classList.toggle('active')">📍 Address</button>
-          <button class="setting-chip active" onclick="this.classList.toggle('active')">🏥 Insurance</button>
-          <button class="setting-chip active" onclick="this.classList.toggle('active')">💊 Pharmacy</button>
+          <button class="setting-chip" disabled>🎂 DOB</button>
+          <button class="setting-chip" disabled>📱 Phone</button>
+          <button class="setting-chip" disabled>📍 Address</button>
+          <button class="setting-chip" disabled>🏥 Insurance</button>
+          <button class="setting-chip" disabled>💊 Pharmacy</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- My Script Modal -->
-  <div class="modal-overlay" id="myScriptModal">
+  <div class="modal-overlay" id="myScriptModal" role="dialog" aria-modal="true" aria-labelledby="myScriptModalTitle" aria-hidden="true">
     <div class="modal">
       <div class="modal-header">
-        <h3>➕ New Script</h3>
-        <button class="modal-close" onclick="closeMyScriptModal()">×</button>
+        <h3 id="myScriptModalTitle">➕ New Script</h3>
+        <button class="modal-close" aria-label="Close New Script" onclick="closeMyScriptModal()">×</button>
       </div>
       <div class="form-group"><label>Icon</label>
         <div class="icon-picker" id="iconPicker">
-          <div class="icon-option selected" data-icon="⭐" onclick="selectIcon(this)">⭐</div>
-          <div class="icon-option" data-icon="💬" onclick="selectIcon(this)">💬</div>
-          <div class="icon-option" data-icon="📞" onclick="selectIcon(this)">📞</div>
-          <div class="icon-option" data-icon="🏥" onclick="selectIcon(this)">🏥</div>
-          <div class="icon-option" data-icon="💊" onclick="selectIcon(this)">💊</div>
-          <div class="icon-option" data-icon="🚗" onclick="selectIcon(this)">🚗</div>
-          <div class="icon-option" data-icon="😊" onclick="selectIcon(this)">😊</div>
-          <div class="icon-option" data-icon="👋" onclick="selectIcon(this)">👋</div>
-          <div class="icon-option" data-icon="❤️" onclick="selectIcon(this)">❤️</div>
-          <div class="icon-option" data-icon="🎉" onclick="selectIcon(this)">🎉</div>
+          <button type="button" aria-label="Star icon" class="icon-option selected" data-icon="⭐" onclick="selectIcon(this)">⭐</button>
+          <button type="button" aria-label="Speech icon" class="icon-option" data-icon="💬" onclick="selectIcon(this)">💬</button>
+          <button type="button" aria-label="Phone icon" class="icon-option" data-icon="📞" onclick="selectIcon(this)">📞</button>
+          <button type="button" aria-label="Hospital icon" class="icon-option" data-icon="🏥" onclick="selectIcon(this)">🏥</button>
+          <button type="button" aria-label="Medication icon" class="icon-option" data-icon="💊" onclick="selectIcon(this)">💊</button>
+          <button type="button" aria-label="Transport icon" class="icon-option" data-icon="🚗" onclick="selectIcon(this)">🚗</button>
+          <button type="button" aria-label="Smile icon" class="icon-option" data-icon="😊" onclick="selectIcon(this)">😊</button>
+          <button type="button" aria-label="Wave icon" class="icon-option" data-icon="👋" onclick="selectIcon(this)">👋</button>
+          <button type="button" aria-label="Heart icon" class="icon-option" data-icon="❤️" onclick="selectIcon(this)">❤️</button>
+          <button type="button" aria-label="Celebration icon" class="icon-option" data-icon="🎉" onclick="selectIcon(this)">🎉</button>
         </div>
       </div>
       <div class="form-group"><label>Label</label><input type="text" id="myScriptName" placeholder="Short name"></div>
@@ -317,11 +313,11 @@
   </div>
 
   <!-- Add Insurance Modal -->
-  <div class="modal-overlay" id="addInsuranceModal">
+  <div class="modal-overlay" id="addInsuranceModal" role="dialog" aria-modal="true" aria-labelledby="insuranceModalTitle" aria-hidden="true">
     <div class="modal">
       <div class="modal-header">
-        <h3>➕ Insurance</h3>
-        <button class="modal-close" onclick="closeAddInsuranceModal()">×</button>
+        <h3 id="insuranceModalTitle">➕ Insurance</h3>
+        <button class="modal-close" aria-label="Close Add Insurance" onclick="closeAddInsuranceModal()">×</button>
       </div>
       <div class="form-group"><label>Type</label><select id="insType"><option>Medical</option><option>Dental</option><option>Vision</option><option>Medicare</option><option>Medicaid</option><option>CHIP</option><option>Pet</option><option>Other</option></select></div>
       <div class="form-group"><label>Provider</label><input type="text" id="insProvider" placeholder="Company name"></div>
@@ -338,11 +334,11 @@
   </div>
 
   <!-- Add Pharmacy Modal -->
-  <div class="modal-overlay" id="addPharmacyModal">
+  <div class="modal-overlay" id="addPharmacyModal" role="dialog" aria-modal="true" aria-labelledby="pharmacyModalTitle" aria-hidden="true">
     <div class="modal">
       <div class="modal-header">
-        <h3>➕ Pharmacy</h3>
-        <button class="modal-close" onclick="closeAddPharmacyModal()">×</button>
+        <h3 id="pharmacyModalTitle">➕ Pharmacy</h3>
+        <button class="modal-close" aria-label="Close Add Pharmacy" onclick="closeAddPharmacyModal()">×</button>
       </div>
       <div class="form-group"><label>Name</label><input type="text" id="pharmName" placeholder="Pharmacy name"></div>
       <div class="form-group"><label>Location</label><input type="text" id="pharmLocation" placeholder="Which one"></div>
@@ -357,11 +353,11 @@
   </div>
 
   <!-- Edit Button Modal -->
-  <div class="modal-overlay" id="editBtnModal">
+  <div class="modal-overlay" id="editBtnModal" role="dialog" aria-modal="true" aria-labelledby="editBtnTitle" aria-hidden="true">
     <div class="modal">
       <div class="modal-header">
         <h3 id="editBtnTitle">Edit Button</h3>
-        <button class="modal-close" onclick="closeEditBtnModal()">×</button>
+        <button class="modal-close" aria-label="Close Edit Button" onclick="closeEditBtnModal()">×</button>
       </div>
       <div class="form-group"><label>Button Label</label><input type="text" id="editBtnLabel" placeholder="Short label"></div>
       <div class="form-group"><label>Full Text</label><textarea id="editBtnText" rows="4" placeholder="What Juniper says"></textarea></div>
@@ -374,8 +370,9 @@
   </div>
 
   <!-- JavaScript Files -->
-  <script src="src/js/app.js"></script>
   <script src="src/js/helpers.js"></script>
+  <script src="src/js/mantis.js"></script>
+  <script src="src/js/app.js"></script>
   <script src="src/js/speech.js"></script>
   <script src="src/js/ui.js"></script>
   <script src="src/js/scripts.js"></script>

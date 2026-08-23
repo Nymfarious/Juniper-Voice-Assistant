@@ -1,5 +1,9 @@
-# Juniper - AI Voice Assistant for Robin
-## Complete System Architecture Document
+# Juniper - Proposed Future Voice Architecture
+## Planning document — not the current application
+
+> Twilio calling, Whisper transcription, a backend server, encrypted local
+> storage, and automated smart responses described below are not implemented in
+> Juniper 6.3.1. The supported public application is documented in `README.md`.
 
 ---
 

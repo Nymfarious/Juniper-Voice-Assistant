@@ -1,96 +1,87 @@
-# 🌿 Juniper - AI Voice Assistant
+# 🌿 Juniper Voice Assistant
 
-An AI-powered voice assistant designed to help people with communication challenges make phone calls. Built in honor of those with speech difficulties, dementia, or other conditions that make phone communication challenging.
+Juniper is a browser-based voice board for people who benefit from typed and
+prepared speech during phone calls. The public application can speak typed
+phrases, reuse scripts, and substitute locally entered profile placeholders
+through an ElevenLabs voice selected by the user.
 
-## Features
+## Current release: 6.3.1
 
-- **🎤 Voice Cloning** - Use ElevenLabs to clone a familiar voice
-- **📞 Quick Speak** - Pre-configured phrases for common phone scenarios
-- **📜 Custom Scripts** - Create and save full call scripts with placeholders
-- **🤖 AI Agents** - Scribe (call summaries) and Smart Response (auto-answers)
-- **🏥 Medical Info** - Store insurance, pharmacy, and personal info
-- **✏️ Editable Buttons** - Customize intro and verify messages
+The supported application is `index.html`. The older `juniper.html` and
+`juniper-v6.2.1.html` files are historical reference builds and are not deployed
+as the primary application.
 
-## Quick Start
+Working features:
 
-### Single-File Version
-Just open `juniper-v6.2.1.html` in a browser. Everything is self-contained.
+- Typed and prepared phrases
+- Editable introduction and verification buttons
+- Reusable personal and full-call scripts
+- Session-only profile, insurance, pharmacy, and history data
+- ElevenLabs voice discovery and text-to-speech
+- Keyboard-accessible dialogs and responsive mobile layout
+- Privacy-minimized Mini Mantis event contract, disabled until Master Mantis has
+  an approved endpoint
 
-### Refactored Version
-Open `index.html` and ensure you're running from a local server (for CSS/JS imports):
+Intentional previews:
+
+- Scribe and Smart Response do not record, summarize, or answer calls yet.
+- AI script generation uses an editable local starter, not a browser-side AI
+  provider key.
+- Juniper does not place phone calls, transcribe audio, or capture photos.
+
+## Privacy and API keys
+
+New personal, medical, pharmacy, insurance, script, customized-phrase, and
+message-history data is kept in `sessionStorage`; it is not encrypted and clears
+when the browser session ends. Existing data from earlier releases remains
+available for migration until the user chooses **Clear private data now**. Do
+not use Juniper on a shared or untrusted device.
+
+The ElevenLabs key is held in JavaScript memory only and is removed on reload.
+Releases before 6.3.1 persisted API keys; 6.3.1 removes those old entries during
+startup. No Claude/Anthropic key is accepted by the public application.
+
+Mini Mantis events never contain messages, scripts, names, addresses, medical
+identifiers, API keys, voice IDs, audio, or device fingerprints. See
+[`docs/MINI-MANTIS-INTEGRATION.md`](docs/MINI-MANTIS-INTEGRATION.md).
+
+## Run locally
 
 ```bash
-# Using Python
-python -m http.server 8000
-
-# Using Node
-npx serve
+npm install
+npx playwright install chromium
+npm run verify
+npm run test:a11y
+node tests/server.mjs
 ```
 
-## Setup
+Open <http://127.0.0.1:4173>.
 
-1. **ElevenLabs API Key** - Get from [elevenlabs.io](https://elevenlabs.io)
-   - Required for voice synthesis
-   - Add in: Info → API tab
+## External setup
 
-2. **Claude API Key** (optional) - Get from [anthropic.com](https://anthropic.com)
-   - Powers AI script generation
-   - Add in: Info → API tab
+1. Create or use an ElevenLabs account.
+2. Open **Info → API** and enter the key for the current page load.
+3. Open **Voice**, select a voice, and use **Test** before a call.
 
-3. **Clone a Voice** (optional)
-   - Go to ElevenLabs → Voices → Add Voice → Instant Voice Cloning
-   - Upload 8-10 short audio clips (10 seconds each)
-   - Name it with "Robin" to auto-detect as special voice
+The application uses the ElevenLabs `eleven_multilingual_v2` model and checks
+provider error responses before trying to play audio. Automated tests mock the
+provider boundary; a final release check with the owner's real account remains
+a manual step.
 
-## Placeholders
+## Repository structure
 
-Use these in scripts:
-- `[FIRST]` - First name (pronounced)
-- `[LAST]` - Last name (pronounced)
-- `[FULL_NAME]` - First + Last
-- `[DOB]` - Date of birth
-- `[PHONE]` - Phone number
-- `[ADDRESS]` - Full address
-- `[INSURANCE]` - Primary insurance ID
-- `[PHARMACY]` - Primary pharmacy name
-
-## Project Structure
-
-```
-juniper-app/
-├── index.html              # Main HTML (uses separate CSS/JS)
-├── juniper-v6.2.1.html     # Single-file version
-├── src/
-│   ├── css/
-│   │   ├── styles.css      # Base styles
-│   │   ├── modals.css      # Modal styles
-│   │   ├── voice.css       # Voice selector
-│   │   ├── scripts.css     # Scripts modal
-│   │   └── agents.css      # AI agents modal
-│   └── js/
-│       ├── app.js          # State & initialization
-│       ├── helpers.js      # User info helpers
-│       ├── speech.js       # Voice & TTS
-│       ├── ui.js           # UI functions
-│       ├── scripts.js      # Scripts management
-│       └── data.js         # Insurance & pharmacy
-└── README.md
+```text
+index.html                       Supported public application
+src/css/                         Application styles
+src/js/                          UI, data, voice, scripts, and Mini Mantis client
+tests/                           Desktop/mobile smoke and accessibility tests
+docs/MINI-MANTIS-INTEGRATION.md  Reporting contract and activation blockers
+JUNIPER-ARCHITECTURE.md          Proposed future calling architecture
 ```
 
-## Version History
-
-- **v6.2.1** - Editable buttons, icons, hovers, insurance/pharmacy management
-- **v6.2.0** - Forest theme, modal-based settings
-- **v6.0.0** - Major refactor with Slate Ember theme
-
-## Made For
-
-This project was created for Robin, who has permanent speech difficulties from B1 thiamine deficiency. Juniper helps her make phone calls to doctors, pharmacies, and other services using her own cloned voice.
+GitHub Actions runs JavaScript syntax validation, desktop/mobile browser smoke
+tests, and WCAG 2 A/AA axe checks before the Pages deployment job.
 
 ## License
 
-MIT - Use freely, help others communicate.
-
----
-
-*Created with 💚 by Shannon (Nymfarious)*
+MIT — created with care by Shannon (Nymfarious).

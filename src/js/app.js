@@ -1,12 +1,12 @@
-// Juniper v6.3.0 - App State & Initialization
+// Juniper v6.3.1 - App State & Initialization
 
 // ============================================
 // STATE
 // ============================================
 const state = {
-  // API Keys
-  apiKey: localStorage.getItem('juniperApiKey') || '',
-  claudeKey: localStorage.getItem('juniperClaudeKey') || '',
+  // API keys are intentionally memory-only. Persisting them in browser storage
+  // makes a shared-device compromise much more damaging.
+  apiKey: '',
   
   // Voice
   allVoices: [],
@@ -18,14 +18,14 @@ const state = {
   isTesting: false,
   
   // User Info
-  info: JSON.parse(localStorage.getItem('juniperInfo') || '{}'),
-  insurances: JSON.parse(localStorage.getItem('juniperInsurances') || '[]'),
-  pharmacies: JSON.parse(localStorage.getItem('juniperPharmacies') || '[]'),
+  info: readStoredJson(sessionStorage, 'juniperInfo', readStoredJson(localStorage, 'juniperInfo', {})),
+  insurances: readStoredJson(sessionStorage, 'juniperInsurances', readStoredJson(localStorage, 'juniperInsurances', [])),
+  pharmacies: readStoredJson(sessionStorage, 'juniperPharmacies', readStoredJson(localStorage, 'juniperPharmacies', [])),
   
   // History & Scripts
-  history: JSON.parse(localStorage.getItem('juniperHistory') || '[]'),
-  myScripts: JSON.parse(localStorage.getItem('juniperScripts') || '[]'),
-  fullScripts: JSON.parse(localStorage.getItem('juniperFullScripts') || JSON.stringify({
+  history: readStoredJson(sessionStorage, 'juniperHistory', readStoredJson(localStorage, 'juniperHistory', [])),
+  myScripts: readStoredJson(sessionStorage, 'juniperScripts', readStoredJson(localStorage, 'juniperScripts', [])),
+  fullScripts: readStoredJson(sessionStorage, 'juniperFullScripts', readStoredJson(localStorage, 'juniperFullScripts', {
     doctor: [{id: 1, name: 'Schedule Appointment', text: "Hello, I'm Juniper calling on behalf of [FIRST] [LAST]. We'd like to schedule an appointment. Date of birth is [DOB]."}],
     pharmacy: [{id: 2, name: 'Refill Rx', text: "Hello, I'm Juniper calling on behalf of [FIRST] [LAST]. We need to refill a prescription. DOB is [DOB]."}],
     transport: [{id: 3, name: 'Schedule Ride', text: "Hello, I'm Juniper calling on behalf of [FIRST] [LAST]. We need a ride. Pickup at [ADDRESS]."}],
@@ -39,16 +39,25 @@ const state = {
   editingBtn: '',
   
   // Custom Button Text
-  introText: localStorage.getItem('juniperIntroText') || "Hello, I'm Juniper, a voice assistant calling on behalf of [FULL_NAME]. [FIRST] can hear you but uses me to communicate. How may I help?",
-  introLabel: localStorage.getItem('juniperIntroLabel') || '"Hello, I\'m Juniper..."',
-  verifyText: localStorage.getItem('juniperVerifyText') || "I'll let [FIRST] verify that directly. [FIRST], go ahead.",
-  verifyLabel: localStorage.getItem('juniperVerifyLabel') || '"Let me verify..."'
+  introText: sessionStorage.getItem('juniperIntroText') || localStorage.getItem('juniperIntroText') || "Hello, I'm Juniper, a voice assistant calling on behalf of [FULL_NAME]. [FIRST] can hear you but uses me to communicate. How may I help?",
+  introLabel: sessionStorage.getItem('juniperIntroLabel') || localStorage.getItem('juniperIntroLabel') || '"Hello, I\'m Juniper..."',
+  verifyText: sessionStorage.getItem('juniperVerifyText') || localStorage.getItem('juniperVerifyText') || "I'll let [FIRST] verify that directly. [FIRST], go ahead.",
+  verifyLabel: sessionStorage.getItem('juniperVerifyLabel') || localStorage.getItem('juniperVerifyLabel') || '"Let me verify..."'
 };
 
 // ============================================
 // INITIALIZATION
 // ============================================
 function init() {
+  // One-time cleanup for keys saved by releases before 6.3.1.
+  localStorage.removeItem('juniperApiKey');
+  localStorage.removeItem('juniperClaudeKey');
+
+  document.querySelectorAll('.form-group > label').forEach(label => {
+    const control = label.parentElement.querySelector('input, select, textarea');
+    if (control?.id) label.htmlFor = control.id;
+  });
+
   // Clear the "Type Anything" input field on load
   const customTextInput = document.getElementById('customText');
   if (customTextInput) {
@@ -60,19 +69,6 @@ function init() {
   updateBtnLabels();
   
   // API Key Status
-  if (state.apiKey) {
-    document.getElementById('apiKey').value = '••••••';
-    document.getElementById('keyStatus').textContent = '✓ Saved';
-    document.getElementById('keyStatus').className = 'key-status saved';
-    loadVoices();
-  }
-  
-  if (state.claudeKey) {
-    document.getElementById('claudeKey').value = '••••••';
-    document.getElementById('claudeStatus').textContent = '✓ Saved';
-    document.getElementById('claudeStatus').className = 'key-status saved';
-  }
-  
   // Speed Slider
   document.getElementById('speedSlider').value = state.speechSpeed;
   document.getElementById('speedValue').textContent = state.speechSpeed.toFixed(2) + 'x';
@@ -102,6 +98,8 @@ function init() {
   renderInsurances();
   renderPharmacies();
   renderQuickScripts();
+
+  MiniMantis.report('app_loaded', 'ok', { version: '6.3.1' });
 }
 
 // Run on load

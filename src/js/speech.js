@@ -1,4 +1,15 @@
-// Juniper v6.2.1 - Speech & Voice
+// Juniper v6.3.1 - Speech & Voice
+
+const ELEVENLABS_MODEL_ID = 'eleven_multilingual_v2';
+
+async function responseError(response) {
+  try {
+    const data = await response.json();
+    return data.detail?.message || data.detail || data.message || `Request failed (${response.status})`;
+  } catch {
+    return `Request failed (${response.status})`;
+  }
+}
 
 // ============================================
 // STATUS
@@ -21,6 +32,7 @@ async function speak(text, isTest = false) {
   setStatus('loading', 'Speaking...');
   
   try {
+    MiniMantis.report('speech_request', 'started');
     const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + state.selectedVoiceId, {
       method: 'POST',
       headers: {
@@ -30,21 +42,26 @@ async function speak(text, isTest = false) {
       },
       body: JSON.stringify({
         text,
-        model_id: 'eleven_monolingual_v1',
+        model_id: ELEVENLABS_MODEL_ID,
         voice_settings: {
           stability: 0.5,
           similarity_boost: 0.75
         }
       })
     });
+
+    if (!response.ok) throw new Error(await responseError(response));
     
     const blob = await response.blob();
-    state.currentAudio = new Audio(URL.createObjectURL(blob));
+    const audioUrl = URL.createObjectURL(blob);
+    state.currentAudio = new Audio(audioUrl);
     state.currentAudio.playbackRate = state.speechSpeed;
     
     state.currentAudio.onplay = () => setStatus('speaking', 'Speaking...');
     state.currentAudio.onended = () => {
+      URL.revokeObjectURL(audioUrl);
       setStatus('ready', 'Ready');
+      MiniMantis.report('speech_request', 'ok');
       if (isTest) {
         document.getElementById('testBtn').textContent = '🔊 Test';
         document.getElementById('testBtn').classList.remove('stop-mode');
@@ -56,7 +73,8 @@ async function speak(text, isTest = false) {
     if (!isTest) addHistory(text);
     
   } catch (e) {
-    setStatus('error', 'Error');
+    setStatus('error', e.message || 'Voice request failed');
+    MiniMantis.report('speech_request', 'error', { errorKind: 'provider_request' });
     console.error(e);
   }
 }
@@ -117,7 +135,9 @@ async function loadVoices() {
     const response = await fetch('https://api.elevenlabs.io/v1/voices', {
       headers: { 'xi-api-key': state.apiKey }
     });
+    if (!response.ok) throw new Error(await responseError(response));
     const data = await response.json();
+    if (!Array.isArray(data.voices)) throw new Error('Voice provider returned an invalid response');
     
     state.allVoices = data.voices.map(v => ({
       id: v.voice_id,
@@ -137,8 +157,11 @@ async function loadVoices() {
     
     renderSpecialVoices();
     filterVoices('all', document.querySelector('.filter-btn'));
+    MiniMantis.report('voice_catalog', 'ok', { resultCount: state.allVoices.length + state.specialVoices.length });
     
   } catch (e) {
+    setStatus('error', e.message || 'Could not load voices');
+    MiniMantis.report('voice_catalog', 'error', { errorKind: 'provider_request' });
     console.error(e);
   }
 }
@@ -147,17 +170,11 @@ function renderSpecialVoices() {
   const container = document.getElementById('specialVoices');
   
   if (!state.specialVoices.length) {
-    container.innerHTML = '<div class="loading-msg">No custom voices</div>';
+    replaceChildrenWith(container, [createElement('div', { className: 'loading-msg', text: 'No custom voices' })]);
     return;
   }
   
-  container.innerHTML = state.specialVoices.map(v => 
-    `<div class="special-voice ${v.id === state.selectedVoiceId ? 'selected' : ''}" 
-          onclick="selectVoice('${v.id}')">
-      <div class="voice-name">⭐ ${v.name}</div>
-      <div class="voice-meta">Custom</div>
-    </div>`
-  ).join('');
+  replaceChildrenWith(container, state.specialVoices.map(voice => makeVoiceButton(voice, true)));
   
   // Auto-select first special voice if none selected
   if (!state.selectedVoiceId && state.specialVoices.length) {
@@ -184,15 +201,23 @@ function renderVoices() {
   const grid = document.getElementById('voiceGrid');
   document.getElementById('voiceCount').textContent = state.filteredVoices.length + ' voices';
   
-  grid.innerHTML = state.filteredVoices.length 
-    ? state.filteredVoices.map(v => 
-        `<div class="voice-card ${v.id === state.selectedVoiceId ? 'selected' : ''}" 
-              onclick="selectVoice('${v.id}')">
-          <div class="voice-name">${v.name}</div>
-          <div class="voice-meta">${v.accent || v.gender || ''}</div>
-        </div>`
-      ).join('')
-    : '<div class="loading-msg">None</div>';
+  replaceChildrenWith(grid, state.filteredVoices.length
+    ? state.filteredVoices.map(voice => makeVoiceButton(voice, false))
+    : [createElement('div', { className: 'loading-msg', text: 'None' })]);
+}
+
+function makeVoiceButton(voice, special) {
+  const button = createElement('button', {
+    className: `${special ? 'special-voice' : 'voice-card'}${voice.id === state.selectedVoiceId ? ' selected' : ''}`,
+    type: 'button',
+    ariaLabel: `Select ${voice.name} voice`
+  }, [
+    createElement('span', { className: 'voice-name', text: `${special ? '⭐ ' : ''}${voice.name}` }),
+    createElement('span', { className: 'voice-meta', text: special ? 'Custom' : (voice.accent || voice.gender || '') })
+  ]);
+  button.dataset.voiceId = voice.id;
+  button.addEventListener('click', () => selectVoice(voice.id));
+  return button;
 }
 
 function selectVoice(id) {
@@ -200,7 +225,8 @@ function selectVoice(id) {
   localStorage.setItem('juniperVoiceId', id);
   
   document.querySelectorAll('.voice-card, .special-voice').forEach(c => {
-    c.classList.toggle('selected', c.onclick?.toString().includes(id));
+    c.classList.toggle('selected', c.dataset.voiceId === id);
+    c.setAttribute('aria-pressed', String(c.dataset.voiceId === id));
   });
   
   document.getElementById('testBtn').disabled = false;

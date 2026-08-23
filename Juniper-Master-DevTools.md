@@ -1,6 +1,10 @@
 # 🌿 Juniper Voice Assistant - Master DevTools
 
-## Current Version: v6.2.1
+> **Historical implementation map.** This file describes the 6.2.1 design and
+> proposed integrations. Use `README.md` and
+> `docs/MINI-MANTIS-INTEGRATION.md` for the supported 6.3.1 application.
+
+## Mapped Version: v6.2.1
 
 ---
 
