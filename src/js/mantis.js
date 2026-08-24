@@ -14,7 +14,7 @@ const MiniMantis = (() => {
     'private_data_cleared'
   ]);
   const allowedOutcomes = new Set(['started', 'ok', 'error']);
-  const allowedDetailKeys = new Set(['version', 'resultCount', 'errorKind']);
+  const allowedDetailKeys = new Set(['version', 'resultCount', 'errorKind', 'provider']);
   const config = Object.freeze({
     enabled: false,
     endpoint: '',
@@ -32,7 +32,7 @@ const MiniMantis = (() => {
     return {
       schemaVersion,
       appId: 'juniper-voice-assistant',
-      appVersion: '6.3.1',
+      appVersion: '6.4.0',
       sessionId,
       event,
       outcome,

@@ -1,4 +1,4 @@
-// Juniper v6.3.1 - UI Functions
+// Juniper v6.4.0 - UI Functions
 
 let modalOpener = null;
 
@@ -65,7 +65,7 @@ function closeInfoModal() {
 
 function openVoiceModal() {
   openModal('voiceModal');
-  if (state.apiKey && !state.allVoices.length) loadVoices();
+  if (!state.allVoices.length) loadVoices();
 }
 
 function closeVoiceModal() {

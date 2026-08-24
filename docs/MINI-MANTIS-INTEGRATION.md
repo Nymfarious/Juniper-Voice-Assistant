@@ -1,6 +1,6 @@
 # Juniper Mini Mantis integration
 
-Juniper 6.3.1 includes a privacy-minimized Mini Mantis client. Reporting is
+Juniper 6.4.0 includes a privacy-minimized Mini Mantis client. Reporting is
 disabled in production until Master Mantis provides an authenticated ingestion
 endpoint and the data policy is approved.
 
@@ -12,7 +12,7 @@ The client emits JSON with this shape:
 {
   "schemaVersion": "1.0",
   "appId": "juniper-voice-assistant",
-  "appVersion": "6.3.1",
+  "appVersion": "6.4.0",
   "sessionId": "random-per-page-load",
   "event": "speech_request",
   "outcome": "ok",
@@ -23,7 +23,8 @@ The client emits JSON with this shape:
 
 Allowed events are `app_loaded`, `app_error`, `speech_request`,
 `voice_catalog`, `script_template`, and `private_data_cleared`. Details are
-restricted to application version, result count, and a coarse error kind.
+restricted to application version, result count, a coarse error kind, and the
+provider name (`elevenlabs`, `google`, or `device`).
 
 The client must never transmit message or script text, names, dates of birth,
 addresses, phone numbers, insurance or pharmacy information, API keys, voice

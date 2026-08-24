@@ -37,6 +37,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install backend dependencies
+        run: npm ci --prefix functions
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev && npm audit --omit=dev --prefix functions
+
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
@@ -61,11 +67,16 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
+      - name: Prepare public site
+        run: |
+          mkdir _site
+          cp index.html _site/
+          cp -R src _site/src
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
-          path: '.'
+          path: '_site'
 
       - name: Deploy to GitHub Pages
         id: deployment
