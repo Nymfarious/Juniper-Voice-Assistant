@@ -167,11 +167,17 @@ async function loadVoices() {
       .filter(voice => !state.specialVoices.some(special => special.id === voice.id))
       .sort((a, b) => a.name.localeCompare(b.name))];
     setStatus('ready', 'Cloud voices ready');
+    const accessMessage = document.getElementById('voiceAccessMessage');
+    if (accessMessage) accessMessage.textContent = 'Cloud voices ready · Device voice remains available';
     MiniMantis.report('voice_catalog', 'ok', { resultCount: cloudVoices.length });
   } catch (error) {
     state.specialVoices = [];
     state.allVoices = [deviceVoice];
     setStatus('ready', 'Device voice available');
+    const accessMessage = document.getElementById('voiceAccessMessage');
+    if (accessMessage && window.JuniperBackend?.currentUser?.()) {
+      accessMessage.textContent = 'Signed in · Cloud voice access unavailable';
+    }
     MiniMantis.report('voice_catalog', 'error', { errorKind: 'provider_request' });
     console.warn(error.message || error);
   }

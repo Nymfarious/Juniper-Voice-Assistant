@@ -57,7 +57,7 @@ if (testDouble) {
     if (signOutButton) signOutButton.hidden = !user;
     if (bannerMessage) {
       bannerMessage.textContent = user
-        ? 'Cloud voices ready · Device voice remains available'
+        ? 'Signed in · Open Voice to check cloud access'
         : 'Device voice ready · Sign in for cloud voices';
     }
     if (bannerSignIn) bannerSignIn.hidden = Boolean(user);
