@@ -8,7 +8,7 @@ const { checkUsage, loadLimits, monthKey, providerOrder, validateSpeechRequest }
 initializeApp();
 
 const db = getFirestore();
-const googleTts = new TextToSpeechClient();
+let googleTts;
 const elevenLabsApiKey = defineSecret('ELEVENLABS_API_KEY');
 const limits = loadLimits();
 const callableOptions = {
@@ -84,6 +84,7 @@ async function fetchElevenLabsVoices(apiKey) {
 }
 
 async function fetchGoogleVoices() {
+  googleTts ||= new TextToSpeechClient();
   const [response] = await googleTts.listVoices({ languageCode: 'en-US' });
   return (response.voices || [])
     .filter(voice => /-Standard-[A-Z]$/.test(voice.name || ''))
@@ -132,6 +133,7 @@ async function synthesizeElevenLabs(request, apiKey) {
 }
 
 async function synthesizeGoogle(request) {
+  googleTts ||= new TextToSpeechClient();
   const [response] = await googleTts.synthesizeSpeech({
     input: { text: request.text },
     voice: { languageCode: 'en-US', name: request.googleVoice },

@@ -4,9 +4,10 @@ import {
   browserSessionPersistence,
   connectAuthEmulator,
   getAuth,
+  getRedirectResult,
   onAuthStateChanged,
   setPersistence,
-  signInWithPopup,
+  signInWithRedirect,
   signOut
 } from 'firebase/auth';
 import { connectFunctionsEmulator, getFunctions, httpsCallable } from 'firebase/functions';
@@ -37,13 +38,20 @@ if (testDouble) {
   }
 
   const ready = setPersistence(auth, browserSessionPersistence)
-    .then(() => new Promise(resolve => {
-      const unsubscribe = onAuthStateChanged(auth, user => {
-        updateAuthStatus(user);
-        unsubscribe();
-        resolve(user);
+    .then(async () => {
+      try {
+        await getRedirectResult(auth);
+      } catch (error) {
+        updateAuthStatus(null, error.message || 'Google sign-in did not complete. Try again.');
+      }
+      return new Promise(resolve => {
+        const unsubscribe = onAuthStateChanged(auth, user => {
+          updateAuthStatus(user);
+          unsubscribe();
+          resolve(user);
+        });
       });
-    }));
+    });
 
   function updateAuthStatus(user, message = '') {
     const status = document.getElementById('backendAuthStatus');
@@ -56,11 +64,10 @@ if (testDouble) {
 
   async function backendSignIn() {
     try {
-      const result = await signInWithPopup(auth, provider);
-      updateAuthStatus(result.user);
-      return result.user;
+      updateAuthStatus(null, 'Opening secure Google sign-in…');
+      await signInWithRedirect(auth, provider);
     } catch (error) {
-      updateAuthStatus(null, error.message || 'Google sign-in failed');
+      updateAuthStatus(null, error.message || 'Google sign-in did not open. Try again.');
       throw error;
     }
   }
