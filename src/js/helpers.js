@@ -86,8 +86,7 @@ function replacePlaceholders(text) {
 // ============================================
 function updateHeaderName() {
   const name = state.info.nickname || state.info.firstName || '';
-  document.getElementById('headerSubtitle').textContent = 
-    name ? name + "'s calm voice companion" : 'A calm voice by your side';
+  document.getElementById('headerSubtitle').textContent = 'Giving you back your voice.';
 }
 
 function updateBtnLabels() {
