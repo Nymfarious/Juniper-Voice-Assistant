@@ -57,9 +57,17 @@ if (testDouble) {
     const status = document.getElementById('backendAuthStatus');
     const signInButton = document.getElementById('backendSignIn');
     const signOutButton = document.getElementById('backendSignOut');
+    const bannerMessage = document.getElementById('voiceAccessMessage');
+    const bannerSignIn = document.getElementById('voiceAccessSignIn');
     if (status) status.textContent = message || (user ? `Signed in as ${user.email || 'approved user'}` : 'Not signed in');
     if (signInButton) signInButton.hidden = Boolean(user);
     if (signOutButton) signOutButton.hidden = !user;
+    if (bannerMessage) {
+      bannerMessage.textContent = user
+        ? 'Cloud voices ready · Device voice remains available'
+        : 'Device voice ready · Sign in for cloud voices';
+    }
+    if (bannerSignIn) bannerSignIn.hidden = Boolean(user);
   }
 
   async function backendSignIn() {
