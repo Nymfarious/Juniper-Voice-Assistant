@@ -37,6 +37,7 @@ async function playCloudAudio(result, text, isTest) {
   const audioUrl = URL.createObjectURL(blob);
   state.currentAudio = new Audio(audioUrl);
   state.currentAudio.playbackRate = state.speechSpeed;
+  state.currentAudio.volume = state.speechVolume;
   state.currentAudio.onplay = () => setStatus('speaking', `Speaking · ${result.provider}`);
   state.currentAudio.onended = () => {
     URL.revokeObjectURL(audioUrl);
@@ -60,6 +61,7 @@ function speakWithDeviceVoice(text, isTest = false) {
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.rate = state.speechSpeed;
+  utterance.volume = state.speechVolume;
   utterance.onstart = () => setStatus('speaking', 'Speaking · device');
   utterance.onend = () => {
     state.currentUtterance = null;
@@ -88,7 +90,7 @@ async function speak(text, isTest = false) {
   try {
     const result = await window.JuniperBackend.synthesize({
       text,
-      provider: 'auto',
+      provider: state.selectedVoiceProvider,
       elevenLabsVoiceId: state.selectedVoiceProvider === 'elevenlabs' ? state.selectedVoiceId : '',
       googleVoice: state.selectedVoiceProvider === 'google' ? state.selectedVoiceId : 'en-US-Standard-C',
       speed: state.speechSpeed
@@ -160,12 +162,8 @@ async function loadVoices() {
       gender: (voice.gender || '').toLowerCase(),
       accent: voice.provider === 'google' ? 'google standard' : 'custom'
     }));
-    state.specialVoices = cloudVoices
-      .filter(voice => voice.provider === 'elevenlabs' && voice.name.toLowerCase().includes('robin'))
-      .sort((a, b) => a.name.localeCompare(b.name));
-    state.allVoices = [deviceVoice, ...cloudVoices
-      .filter(voice => !state.specialVoices.some(special => special.id === voice.id))
-      .sort((a, b) => a.name.localeCompare(b.name))];
+    state.specialVoices = [];
+    state.allVoices = [deviceVoice, ...cloudVoices.sort((a, b) => a.name.localeCompare(b.name))];
     setStatus('ready', 'Cloud voices ready');
     const accessMessage = document.getElementById('voiceAccessMessage');
     if (accessMessage) accessMessage.textContent = 'Cloud voices ready · Device voice remains available';
@@ -181,28 +179,17 @@ async function loadVoices() {
     MiniMantis.report('voice_catalog', 'error', { errorKind: 'provider_request' });
     console.warn(error.message || error);
   }
-  renderSpecialVoices();
   filterVoices('all', document.querySelector('.filter-btn'));
   if (!state.allVoices.some(voice => voice.id === state.selectedVoiceId && voice.provider === state.selectedVoiceProvider)) {
     selectVoice('device-default', 'device');
   }
 }
 
-function renderSpecialVoices() {
-  const container = document.getElementById('specialVoices');
-  if (!state.specialVoices.length) {
-    replaceChildrenWith(container, [createElement('div', { className: 'loading-msg', text: 'No custom voices' })]);
-    return;
-  }
-  replaceChildrenWith(container, state.specialVoices.map(voice => makeVoiceButton(voice, true)));
-}
-
 function filterVoices(filter, button) {
   document.querySelectorAll('.filter-btn').forEach(item => item.classList.remove('active'));
   button.classList.add('active');
   if (filter === 'all') state.filteredVoices = state.allVoices;
-  else state.filteredVoices = [...state.specialVoices, ...state.allVoices]
-    .filter(voice => voice.provider === filter);
+  else state.filteredVoices = state.allVoices.filter(voice => voice.provider === filter);
   renderVoices();
 }
 
