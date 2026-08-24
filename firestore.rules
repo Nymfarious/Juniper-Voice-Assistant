@@ -3,8 +3,8 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     // Juniper's browser never reads or writes Firestore directly. Callable
-    // functions use the Admin SDK and enforce authentication, App Check,
-    // membership, and usage ceilings before accessing these collections.
+    // functions use the Admin SDK and enforce authentication, membership,
+    // and usage ceilings before accessing these collections.
     match /{document=**} {
       allow read, write: if false;
     }
