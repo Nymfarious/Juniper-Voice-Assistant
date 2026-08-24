@@ -5,6 +5,7 @@ test('launches without runtime errors and exposes working settings tabs', async 
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('/');
+  await expect(page.getByText('Device voice ready · Sign in for cloud voices')).toBeVisible();
   await expect(page.getByRole('heading', { name: /Juniper/ })).toBeVisible();
   await page.getByRole('button', { name: 'Info' }).click();
   const dialog = page.getByRole('dialog', { name: 'My Info' });

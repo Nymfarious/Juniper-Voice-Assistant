@@ -108,6 +108,49 @@ header p {
   align-items: center;
 }
 
+.voice-access-banner {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  color: var(--text-secondary);
+  background: rgba(117, 203, 208, 0.09);
+  border: 1px solid var(--border-accent);
+  border-radius: 12px;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.voice-access-dot {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+  background: var(--accent-info);
+  border-radius: 50%;
+  box-shadow: 0 0 12px rgba(117, 203, 208, 0.55);
+}
+
+.voice-access-banner button {
+  min-height: 36px;
+  margin-left: auto;
+  padding: 7px 12px;
+  color: var(--text-primary);
+  background: #245f5b;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.voice-access-banner button:hover { background: #2b716c; }
+
+@media (max-width: 390px) {
+  .voice-access-banner { align-items: flex-start; flex-wrap: wrap; }
+  .voice-access-banner button { margin-left: 18px; }
+}
+
 .collapse-toggle {
   border: 0;
   background: transparent;
