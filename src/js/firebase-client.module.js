@@ -49,11 +49,15 @@ if (testDouble) {
   function updateAuthStatus(user, message = '') {
     const status = document.getElementById('backendAuthStatus');
     const signInButton = document.getElementById('backendSignIn');
+    const switchButton = document.getElementById('backendSwitch');
     const signOutButton = document.getElementById('backendSignOut');
     const bannerMessage = document.getElementById('voiceAccessMessage');
     const bannerSignIn = document.getElementById('voiceAccessSignIn');
+    const bannerSwitch = document.getElementById('voiceAccessSwitch');
+    const bannerSignOut = document.getElementById('voiceAccessSignOut');
     if (status) status.textContent = message || (user ? `Signed in as ${user.email || 'approved user'}` : 'Not signed in');
     if (signInButton) signInButton.hidden = Boolean(user);
+    if (switchButton) switchButton.hidden = !user;
     if (signOutButton) signOutButton.hidden = !user;
     if (bannerMessage) {
       bannerMessage.textContent = user
@@ -61,6 +65,8 @@ if (testDouble) {
         : 'Device voice ready · Sign in for cloud voices';
     }
     if (bannerSignIn) bannerSignIn.hidden = Boolean(user);
+    if (bannerSwitch) bannerSwitch.hidden = !user;
+    if (bannerSignOut) bannerSignOut.hidden = !user;
   }
 
   async function backendSignIn() {
@@ -70,7 +76,7 @@ if (testDouble) {
       updateAuthStatus(credential.user);
       return credential.user;
     } catch (error) {
-      updateAuthStatus(null, error.message || 'Google sign-in did not open. Try again.');
+      updateAuthStatus(auth.currentUser, error.message || 'Google sign-in did not open. Try again.');
       throw error;
     }
   }
@@ -91,6 +97,7 @@ if (testDouble) {
     ready,
     currentUser: () => auth.currentUser,
     signIn: backendSignIn,
+    switchAccount: backendSignIn,
     signOut: backendSignOut,
     listVoices: () => call('listVoiceOptions', {}),
     synthesize: request => call('synthesizeVoice', request)

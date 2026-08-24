@@ -131,9 +131,15 @@ header p {
   box-shadow: 0 0 12px rgba(117, 203, 208, 0.55);
 }
 
+.voice-access-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-left: auto;
+}
+
 .voice-access-banner button {
   min-height: 36px;
-  margin-left: auto;
   padding: 7px 12px;
   color: var(--text-primary);
   background: #245f5b;
@@ -145,10 +151,12 @@ header p {
 }
 
 .voice-access-banner button:hover { background: #2b716c; }
+.voice-access-banner button.quiet { color: var(--text-secondary); background: transparent; border-color: var(--border-color); }
+.voice-access-banner button.quiet:hover { color: var(--text-primary); background: rgba(255, 255, 255, 0.07); }
 
 @media (max-width: 390px) {
   .voice-access-banner { align-items: flex-start; flex-wrap: wrap; }
-  .voice-access-banner button { margin-left: 18px; }
+  .voice-access-actions { width: 100%; margin-left: 18px; }
 }
 
 .collapse-toggle {

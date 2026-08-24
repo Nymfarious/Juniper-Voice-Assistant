@@ -32,7 +32,11 @@
     <aside class="voice-access-banner" id="voiceAccessBanner" aria-live="polite">
       <span class="voice-access-dot" aria-hidden="true"></span>
       <span id="voiceAccessMessage">Device voice ready · Sign in for cloud voices</span>
-      <button id="voiceAccessSignIn" type="button" onclick="signInToBackend()">Sign in</button>
+      <div class="voice-access-actions">
+        <button id="voiceAccessSignIn" type="button" onclick="signInToBackend()">Sign in</button>
+        <button id="voiceAccessSwitch" type="button" onclick="switchBackendAccount()" hidden>Switch account</button>
+        <button id="voiceAccessSignOut" class="quiet" type="button" onclick="signOutOfBackend()" hidden>Sign out</button>
+      </div>
     </aside>
 
     <!-- Type Anything Card -->
@@ -185,6 +189,7 @@
           <p class="privacy-note">Sign in with an approved Google account. Provider keys stay on the Firebase backend.</p>
           <div class="api-row">
             <button class="modal-btn save" id="backendSignIn" onclick="signInToBackend()">Sign in with Google</button>
+            <button class="modal-btn" id="backendSwitch" onclick="switchBackendAccount()" hidden>Switch Google account</button>
             <button class="modal-btn cancel" id="backendSignOut" onclick="signOutOfBackend()" hidden>Sign out</button>
           </div>
           <div class="key-status" id="backendAuthStatus" role="status" aria-live="polite">Checking sign-in…</div>
