@@ -28,7 +28,7 @@
   "auth": {
     "providers": {
       "googleSignIn": {
-        "oAuthBrandDisplayName": "Juniper Voice Assistant",
+        "oAuthBrandDisplayName": "Nymfarious | Juniper Voice Assistant",
         "supportEmail": "nymfarious@gmail.com"
       }
     }
