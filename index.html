@@ -182,7 +182,7 @@
       <div id="info-api" class="info-tab-content">
         <div class="form-group">
           <h4>Cloud voices</h4>
-          <p class="privacy-note">Sign in with one of the three approved Google accounts. Provider keys stay on the Firebase backend.</p>
+          <p class="privacy-note">Sign in with an approved Google account. Provider keys stay on the Firebase backend.</p>
           <div class="api-row">
             <button class="modal-btn save" id="backendSignIn" onclick="signInToBackend()">Sign in with Google</button>
             <button class="modal-btn cancel" id="backendSignOut" onclick="signOutOfBackend()" hidden>Sign out</button>
@@ -197,32 +197,50 @@
   <!-- Voice Modal -->
   <div class="modal-overlay" id="voiceModal" role="dialog" aria-modal="true" aria-labelledby="voiceModalTitle" aria-hidden="true">
     <div class="modal large">
-      <div class="modal-header">
-        <h3 id="voiceModalTitle">🎤 Voice Settings</h3>
+      <div class="modal-header voice-modal-header">
+        <div>
+          <span class="voice-eyebrow">Voice pond</span>
+          <h3 id="voiceModalTitle">Choose how Juni sounds</h3>
+          <p>Pick a warm custom voice, dependable Google Standard, or the voice already on this device.</p>
+        </div>
         <button class="modal-close" aria-label="Close Voice Settings" onclick="closeVoiceModal()">×</button>
       </div>
-      <div class="voice-section">
-        <h4>Your Voices</h4>
-        <div class="voice-grid special" id="specialVoices"></div>
+      <div class="provider-legend" aria-label="Available voice sources">
+        <span><i class="provider-dot custom" aria-hidden="true"></i>Custom</span>
+        <span><i class="provider-dot google" aria-hidden="true"></i>Google Standard</span>
+        <span><i class="provider-dot device" aria-hidden="true"></i>On this device</span>
       </div>
-      <div class="voice-section">
-        <h4>All Voices <span id="voiceCount" class="voice-count" aria-live="polite">0 voices</span></h4>
+      <section class="voice-section featured-voices" aria-labelledby="featuredVoiceTitle">
+        <div class="voice-section-heading">
+          <div><span class="voice-kicker">Featured</span><h4 id="featuredVoiceTitle">Made for Robin</h4></div>
+          <p>Juni's personal custom voice, when cloud access is ready.</p>
+        </div>
+        <div class="voice-grid special" id="specialVoices"></div>
+      </section>
+      <section class="voice-section" aria-labelledby="voiceLibraryTitle">
+        <div class="voice-section-heading library-heading">
+          <div><span class="voice-kicker">Browse</span><h4 id="voiceLibraryTitle">Voice library</h4></div>
+          <span id="voiceCount" class="voice-count" aria-live="polite">0 voices</span>
+        </div>
         <div class="filter-row">
           <button class="filter-btn active" data-filter="all" onclick="filterVoices('all',this)">All</button>
-          <button class="filter-btn" aria-label="Female voices" data-filter="female" onclick="filterVoices('female',this)">👩</button>
-          <button class="filter-btn" aria-label="Male voices" data-filter="male" onclick="filterVoices('male',this)">👨</button>
-          <button class="filter-btn" aria-label="American voices" data-filter="american" onclick="filterVoices('american',this)">🇺🇸</button>
-          <button class="filter-btn" aria-label="British voices" data-filter="british" onclick="filterVoices('british',this)">🇬🇧</button>
+          <button class="filter-btn" data-filter="elevenlabs" onclick="filterVoices('elevenlabs',this)">Custom</button>
+          <button class="filter-btn" data-filter="google" onclick="filterVoices('google',this)">Google</button>
+          <button class="filter-btn" data-filter="device" onclick="filterVoices('device',this)">Device</button>
         </div>
         <div class="voice-grid" id="voiceGrid"></div>
-      </div>
+      </section>
       <div class="test-controls">
-        <button class="modal-btn" id="testBtn" onclick="toggleTest()">🔊 Test</button>
+        <div class="selected-voice" aria-live="polite">
+          <span>Selected voice</span>
+          <strong id="selectedVoiceSummary">Device voice · On this device</strong>
+        </div>
         <div class="speed-control">
-          <span>Speed:</span>
+          <label for="speedSlider">Speaking pace</label>
           <input type="range" id="speedSlider" aria-label="Speech speed" min="0.8" max="1.2" step="0.05" value="0.95">
           <span id="speedValue">0.95x</span>
         </div>
+        <button class="modal-btn test-btn" id="testBtn" onclick="toggleTest()">🔊 Test selected voice</button>
       </div>
     </div>
   </div>

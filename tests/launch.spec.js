@@ -81,7 +81,13 @@ test('handles the ElevenLabs voice catalog boundary and safely renders provider 
   });
   await page.goto('/');
   await page.locator('.toolbar-btn').filter({ hasText: 'Voice' }).click();
+  await expect(page.getByRole('heading', { name: 'Choose how Juni sounds' })).toBeVisible();
+  await expect(page.getByText('Made for Robin')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Google', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Device', exact: true })).toBeVisible();
   await expect(page.getByText('<img src=x onerror="window.__voiceXss=true">Juniper Test', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Select <img src=x onerror="window.__voiceXss=true">Juniper Test voice' }).click();
+  await expect(page.getByText('<img src=x onerror="window.__voiceXss=true">Juniper Test · Custom · ElevenLabs', { exact: true })).toBeVisible();
   expect(await page.evaluate(() => window.__voiceXss)).toBeUndefined();
 });
 
