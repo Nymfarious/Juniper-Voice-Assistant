@@ -4,10 +4,9 @@ import {
   browserSessionPersistence,
   connectAuthEmulator,
   getAuth,
-  getRedirectResult,
   onAuthStateChanged,
   setPersistence,
-  signInWithRedirect,
+  signInWithPopup,
   signOut
 } from 'firebase/auth';
 import { connectFunctionsEmulator, getFunctions, httpsCallable } from 'firebase/functions';
@@ -30,6 +29,7 @@ if (testDouble) {
   const auth = getAuth(app);
   const functions = getFunctions(app, 'us-west1');
   const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
   const local = ['127.0.0.1', 'localhost'].includes(window.location.hostname);
 
   if (local) {
@@ -38,20 +38,13 @@ if (testDouble) {
   }
 
   const ready = setPersistence(auth, browserSessionPersistence)
-    .then(async () => {
-      try {
-        await getRedirectResult(auth);
-      } catch (error) {
-        updateAuthStatus(null, error.message || 'Google sign-in did not complete. Try again.');
-      }
-      return new Promise(resolve => {
-        const unsubscribe = onAuthStateChanged(auth, user => {
-          updateAuthStatus(user);
-          unsubscribe();
-          resolve(user);
-        });
+    .then(() => new Promise(resolve => {
+      const unsubscribe = onAuthStateChanged(auth, user => {
+        updateAuthStatus(user);
+        unsubscribe();
+        resolve(user);
       });
-    });
+    }));
 
   function updateAuthStatus(user, message = '') {
     const status = document.getElementById('backendAuthStatus');
@@ -73,7 +66,9 @@ if (testDouble) {
   async function backendSignIn() {
     try {
       updateAuthStatus(null, 'Opening secure Google sign-in…');
-      await signInWithRedirect(auth, provider);
+      const credential = await signInWithPopup(auth, provider);
+      updateAuthStatus(credential.user);
+      return credential.user;
     } catch (error) {
       updateAuthStatus(null, error.message || 'Google sign-in did not open. Try again.');
       throw error;
