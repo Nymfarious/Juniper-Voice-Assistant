@@ -11,6 +11,10 @@ Public site: [juni.nymfarious.com](https://juni.nymfarious.com/). Vercel also
 provides [juni-kappa.vercel.app](https://juni-kappa.vercel.app/); the shorter
 `juni.vercel.app` name is owned by another Vercel account.
 
+Google sign-in uses the branded Firebase handler at
+`auth.juni.nymfarious.com`. The OAuth application name is
+`Nymfarious | Juniper Voice Assistant`.
+
 The supported application is `index.html`. The Pages artifact contains only
 `index.html` and `src/`; the older `juniper.html` and `juniper-v6.2.1.html`
 files remain historical references in the repository and are not published.

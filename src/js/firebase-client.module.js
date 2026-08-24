@@ -22,7 +22,7 @@ if (testDouble) {
     appId: '1:465750626776:web:25df7cc883689ce638a2ad',
     storageBucket: 'juniper-voice-assistant-nym.firebasestorage.app',
     apiKey: 'AIzaSyCzO3XTYogZVYOTRFUBJe2r33C8gJ8i-5E',
-    authDomain: 'juniper-voice-assistant-nym.firebaseapp.com',
+    authDomain: 'auth.juni.nymfarious.com',
     messagingSenderId: '465750626776'
   };
   const app = initializeApp(firebaseConfig);

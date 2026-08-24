@@ -623,10 +623,25 @@ header p {
 }
 
 .footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
   text-align: center;
   font-size: 0.7rem;
   color: var(--text-muted);
   margin-top: 16px;
+}
+
+.footer a {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+
+.footer a:hover,
+.footer a:focus-visible {
+  color: var(--accent);
 }
 
 /* Responsive */
