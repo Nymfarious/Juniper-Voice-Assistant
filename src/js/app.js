@@ -11,6 +11,7 @@ const state = {
   selectedVoiceId: localStorage.getItem('juniperVoiceId') || '',
   selectedVoiceProvider: localStorage.getItem('juniperVoiceProvider') || 'device',
   speechSpeed: parseFloat(localStorage.getItem('juniperSpeed') || '0.95'),
+  speechVolume: parseFloat(localStorage.getItem('juniperVolume') || '0.6'),
   currentAudio: null,
   currentUtterance: null,
   isTesting: false,
@@ -74,6 +75,14 @@ function init() {
     state.speechSpeed = parseFloat(e.target.value);
     document.getElementById('speedValue').textContent = state.speechSpeed.toFixed(2) + 'x';
     localStorage.setItem('juniperSpeed', state.speechSpeed);
+  });
+  document.getElementById('volumeSlider').value = state.speechVolume;
+  document.getElementById('volumeValue').textContent = Math.round(state.speechVolume * 100) + '%';
+  document.getElementById('volumeSlider').addEventListener('input', (e) => {
+    state.speechVolume = parseFloat(e.target.value);
+    document.getElementById('volumeValue').textContent = Math.round(state.speechVolume * 100) + '%';
+    localStorage.setItem('juniperVolume', state.speechVolume);
+    if (state.currentAudio) state.currentAudio.volume = state.speechVolume;
   });
   
   // Enter key for custom text

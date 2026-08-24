@@ -216,18 +216,6 @@
         </div>
         <button class="modal-close" aria-label="Close Voice Settings" onclick="closeVoiceModal()">×</button>
       </div>
-      <div class="provider-legend" aria-label="Available voice sources">
-        <span><i class="provider-dot custom" aria-hidden="true"></i>Custom</span>
-        <span><i class="provider-dot google" aria-hidden="true"></i>Google Standard</span>
-        <span><i class="provider-dot device" aria-hidden="true"></i>On this device</span>
-      </div>
-      <section class="voice-section featured-voices" aria-labelledby="featuredVoiceTitle">
-        <div class="voice-section-heading">
-          <div><span class="voice-kicker">Featured</span><h4 id="featuredVoiceTitle">Made for Robin</h4></div>
-          <p>Juni's personal custom voice, when cloud access is ready.</p>
-        </div>
-        <div class="voice-grid special" id="specialVoices"></div>
-      </section>
       <section class="voice-section" aria-labelledby="voiceLibraryTitle">
         <div class="voice-section-heading library-heading">
           <div><span class="voice-kicker">Browse</span><h4 id="voiceLibraryTitle">Voice library</h4></div>
@@ -235,9 +223,9 @@
         </div>
         <div class="filter-row">
           <button class="filter-btn active" data-filter="all" onclick="filterVoices('all',this)">All</button>
-          <button class="filter-btn" data-filter="elevenlabs" onclick="filterVoices('elevenlabs',this)">Custom</button>
           <button class="filter-btn" data-filter="google" onclick="filterVoices('google',this)">Google</button>
           <button class="filter-btn" data-filter="device" onclick="filterVoices('device',this)">Device</button>
+          <button class="filter-btn" data-filter="elevenlabs" onclick="filterVoices('elevenlabs',this)">Custom</button>
         </div>
         <div class="voice-grid" id="voiceGrid"></div>
       </section>
@@ -250,6 +238,11 @@
           <label for="speedSlider">Speaking pace</label>
           <input type="range" id="speedSlider" aria-label="Speech speed" min="0.8" max="1.2" step="0.05" value="0.95">
           <span id="speedValue">0.95x</span>
+        </div>
+        <div class="volume-control">
+          <label for="volumeSlider">Loudness</label>
+          <input type="range" id="volumeSlider" aria-label="Voice loudness" min="0" max="1" step="0.05" value="0.6">
+          <span id="volumeValue">60%</span>
         </div>
         <button class="modal-btn test-btn" id="testBtn" onclick="toggleTest()">🔊 Test selected voice</button>
       </div>

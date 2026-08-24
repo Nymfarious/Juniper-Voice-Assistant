@@ -82,13 +82,41 @@ test('handles the ElevenLabs voice catalog boundary and safely renders provider 
   await page.goto('/');
   await page.locator('.toolbar-btn').filter({ hasText: 'Voice' }).click();
   await expect(page.getByRole('heading', { name: 'Choose how Juni sounds' })).toBeVisible();
-  await expect(page.getByText('Made for Robin')).toBeVisible();
+  await expect(page.getByText('Made for Robin')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Google', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Device', exact: true })).toBeVisible();
   await expect(page.getByText('<img src=x onerror="window.__voiceXss=true">Juniper Test', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Select <img src=x onerror="window.__voiceXss=true">Juniper Test voice' }).click();
   await expect(page.getByText('<img src=x onerror="window.__voiceXss=true">Juniper Test · Custom · ElevenLabs', { exact: true })).toBeVisible();
   expect(await page.evaluate(() => window.__voiceXss)).toBeUndefined();
+});
+
+test('routes Google voices directly and applies the selected loudness', async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__speechRequest = null;
+    window.JUNIPER_BACKEND_TEST_DOUBLE = {
+      ready: Promise.resolve(),
+      currentUser: () => ({ email: 'approved@example.com' }),
+      signIn: async () => ({ email: 'approved@example.com' }),
+      signOut: async () => {},
+      listVoices: async () => ({ voices: [{ provider: 'google', id: 'en-US-Standard-A', name: 'en-US-Standard-A' }] }),
+      synthesize: async request => {
+        window.__speechRequest = request;
+        throw new Error('test stops before audio playback');
+      }
+    };
+  });
+  await page.goto('/');
+  await page.locator('.toolbar-btn').filter({ hasText: 'Voice' }).click();
+  await page.getByRole('button', { name: 'Select en-US-Standard-A voice' }).click();
+  await page.getByLabel('Voice loudness').fill('0.4');
+  await page.getByRole('button', { name: 'Test selected voice' }).click();
+  await expect.poll(() => page.evaluate(() => window.__speechRequest)).toMatchObject({
+    provider: 'google',
+    googleVoice: 'en-US-Standard-A',
+    elevenLabsVoiceId: ''
+  });
+  await expect(page.getByText('40%')).toBeVisible();
 });
 
 test('offers signed-in users account switching and sign out controls', async ({ page }) => {
