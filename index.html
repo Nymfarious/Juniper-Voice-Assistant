@@ -6,9 +6,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>Juniper Voice Assistant</title>
   
-  <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+  <!-- Brand icon: Juni's dragonfly resting on a juniper leaf. -->
+  <link rel="icon" type="image/svg+xml" href="assets/juniper-mark.svg">
+  <link rel="apple-touch-icon" href="assets/juniper-mark.svg">
+  <meta name="theme-color" content="#0b2528">
   
   <!-- Stylesheets -->
   <link rel="stylesheet" href="src/css/styles.css">
@@ -19,26 +20,16 @@
 </head>
 <body>
   <div class="container">
-    <header>
-      <h1>
-        <span class="juniper-icon" aria-hidden="true">
-          <svg class="dragonfly" viewBox="0 0 72 72">
-            <circle class="pond-ripple ripple-one" cx="36" cy="55" r="10" />
-            <circle class="pond-ripple ripple-two" cx="36" cy="55" r="18" />
-            <g class="dragonfly-body">
-              <ellipse class="wing" cx="25" cy="27" rx="15" ry="7" transform="rotate(-28 25 27)" />
-              <ellipse class="wing" cx="47" cy="27" rx="15" ry="7" transform="rotate(28 47 27)" />
-              <ellipse class="wing" cx="27" cy="39" rx="12" ry="5" transform="rotate(24 27 39)" />
-              <ellipse class="wing" cx="45" cy="39" rx="12" ry="5" transform="rotate(-24 45 39)" />
-              <circle class="dragonfly-head" cx="36" cy="22" r="4" />
-              <path class="dragonfly-tail" d="M36 26v24" />
-            </g>
-          </svg>
-        </span>
-        Juniper
-      </h1>
-      <p id="headerSubtitle">A calm voice by your side</p>
-      <div class="version">v6.4.0</div>
+    <header class="hero-banner">
+      <img class="hero-art" src="assets/juniper-dragonfly-hero.webp" alt="" width="1536" height="1024">
+      <div class="hero-copy">
+        <h1>
+          <img class="juniper-icon" src="assets/juniper-mark.svg" alt="" width="64" height="64">
+          Juniper
+        </h1>
+        <p id="headerSubtitle">A calm voice by your side</p>
+        <div class="version">v6.4.0</div>
+      </div>
     </header>
 
     <!-- Type Anything Card -->
