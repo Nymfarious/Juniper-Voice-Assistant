@@ -28,3 +28,5 @@ Juniper Voice Assistant Audio/
 *2FA*recovery*
 *recovery_code*
 _env*.txt
+.vercel
+.env*
