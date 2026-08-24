@@ -81,8 +81,47 @@ test('handles the ElevenLabs voice catalog boundary and safely renders provider 
   });
   await page.goto('/');
   await page.locator('.toolbar-btn').filter({ hasText: 'Voice' }).click();
+  await expect(page.getByRole('heading', { name: 'Choose how Juni sounds' })).toBeVisible();
+  await expect(page.getByText('Made for Robin')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Google', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Device', exact: true })).toBeVisible();
   await expect(page.getByText('<img src=x onerror="window.__voiceXss=true">Juniper Test', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Select <img src=x onerror="window.__voiceXss=true">Juniper Test voice' }).click();
+  await expect(page.getByText('<img src=x onerror="window.__voiceXss=true">Juniper Test · Custom · ElevenLabs', { exact: true })).toBeVisible();
   expect(await page.evaluate(() => window.__voiceXss)).toBeUndefined();
+});
+
+test('offers signed-in users account switching and sign out controls', async ({ page }) => {
+  await page.addInitScript(() => {
+    let user = { email: 'first@example.com' };
+    window.__authCalls = { switches: 0, signOuts: 0 };
+    window.JUNIPER_BACKEND_TEST_DOUBLE = {
+      ready: Promise.resolve(),
+      currentUser: () => user,
+      signIn: async () => user,
+      switchAccount: async () => {
+        window.__authCalls.switches += 1;
+        user = { email: 'second@example.com' };
+        return user;
+      },
+      signOut: async () => {
+        window.__authCalls.signOuts += 1;
+        user = null;
+      },
+      listVoices: async () => ({ voices: [] }),
+      synthesize: async () => ({ provider: 'device', audioBase64: '', contentType: 'audio/mpeg' })
+    };
+  });
+  await page.goto('/');
+  await page.evaluate(() => {
+    document.getElementById('voiceAccessSwitch').hidden = false;
+    document.getElementById('voiceAccessSignOut').hidden = false;
+  });
+  await page.getByRole('button', { name: 'Switch account' }).click();
+  await expect.poll(() => page.evaluate(() => window.__authCalls.switches)).toBe(1);
+  await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await expect.poll(() => page.evaluate(() => window.__authCalls.signOuts)).toBe(1);
+  await expect(page.getByText('Device voice ready · Sign in for cloud voices')).toBeVisible();
 });
 
 test('queues only allowlisted Mini Mantis diagnostics while delivery is disabled', async ({ page }) => {

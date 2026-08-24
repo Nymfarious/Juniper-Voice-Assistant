@@ -15,7 +15,7 @@ function setStatus(status, text) {
 
 function resetTestButton() {
   if (!state.isTesting) return;
-  document.getElementById('testBtn').textContent = '🔊 Test';
+  document.getElementById('testBtn').textContent = '🔊 Test selected voice';
   document.getElementById('testBtn').classList.remove('stop-mode');
   state.isTesting = false;
 }
@@ -201,9 +201,15 @@ function filterVoices(filter, button) {
   document.querySelectorAll('.filter-btn').forEach(item => item.classList.remove('active'));
   button.classList.add('active');
   if (filter === 'all') state.filteredVoices = state.allVoices;
-  else if (filter === 'female' || filter === 'male') state.filteredVoices = state.allVoices.filter(voice => voice.gender === filter);
-  else state.filteredVoices = state.allVoices.filter(voice => voice.accent.includes(filter));
+  else state.filteredVoices = [...state.specialVoices, ...state.allVoices]
+    .filter(voice => voice.provider === filter);
   renderVoices();
+}
+
+function voiceProviderLabel(provider) {
+  if (provider === 'elevenlabs') return 'Custom · ElevenLabs';
+  if (provider === 'google') return 'Google Standard';
+  return 'On this device';
 }
 
 function renderVoices() {
@@ -221,8 +227,11 @@ function makeVoiceButton(voice, special) {
     type: 'button',
     ariaLabel: `Select ${voice.name} voice`
   }, [
-    createElement('span', { className: 'voice-name', text: `${special ? '⭐ ' : ''}${voice.name}` }),
-    createElement('span', { className: 'voice-meta', text: special ? 'ElevenLabs custom' : voice.accent })
+    createElement('span', { className: 'voice-card-mark', ariaHidden: 'true' }),
+    createElement('span', { className: 'voice-card-copy' }, [
+      createElement('span', { className: 'voice-name', text: voice.name }),
+      createElement('span', { className: 'voice-meta', text: voiceProviderLabel(voice.provider) })
+    ])
   ]);
   button.dataset.voiceId = voice.id;
   button.dataset.voiceProvider = voice.provider;
@@ -242,6 +251,8 @@ function selectVoice(id, provider) {
     card.classList.toggle('selected', active);
     card.setAttribute('aria-pressed', String(active));
   });
+  const summary = document.getElementById('selectedVoiceSummary');
+  if (summary) summary.textContent = `${selected?.name || 'Device voice'} · ${voiceProviderLabel(state.selectedVoiceProvider)}`;
   document.getElementById('testBtn').disabled = false;
 }
 
@@ -252,7 +263,7 @@ function toggleTest() {
     return;
   }
   state.isTesting = true;
-  document.getElementById('testBtn').textContent = '⏹ Stop';
+  document.getElementById('testBtn').textContent = '⏹ Stop voice';
   document.getElementById('testBtn').classList.add('stop-mode');
   speak("Hello! I'm Juniper.", true);
 }

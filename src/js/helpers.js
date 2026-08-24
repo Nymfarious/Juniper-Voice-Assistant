@@ -147,6 +147,18 @@ async function signInToBackend() {
   }
 }
 
+async function switchBackendAccount() {
+  try {
+    await window.JuniperBackend?.switchAccount?.();
+    state.allVoices = [];
+    state.specialVoices = [];
+    state.filteredVoices = [];
+    await loadVoices();
+  } catch (error) {
+    updateBackendStatus(error.message || 'Google account switch was canceled');
+  }
+}
+
 async function signOutOfBackend() {
   await window.JuniperBackend?.signOut();
   state.allVoices = [];
@@ -156,6 +168,14 @@ async function signOutOfBackend() {
   state.selectedVoiceId = 'device-default';
   localStorage.setItem('juniperVoiceProvider', 'device');
   localStorage.setItem('juniperVoiceId', 'device-default');
+  document.getElementById('voiceAccessMessage').textContent = 'Device voice ready · Sign in for cloud voices';
+  document.getElementById('voiceAccessSignIn').hidden = false;
+  document.getElementById('voiceAccessSwitch').hidden = true;
+  document.getElementById('voiceAccessSignOut').hidden = true;
+  document.getElementById('backendSignIn').hidden = false;
+  document.getElementById('backendSwitch').hidden = true;
+  document.getElementById('backendSignOut').hidden = true;
+  await loadVoices();
   updateBackendStatus();
 }
 
