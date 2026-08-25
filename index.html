@@ -159,6 +159,7 @@
         <button class="modal-tab" role="tab" aria-selected="false" onclick="showInfoTab('insurance',this)">Insurance</button>
         <button class="modal-tab" role="tab" aria-selected="false" onclick="showInfoTab('pharmacy',this)">Pharmacy</button>
         <button class="modal-tab" role="tab" aria-selected="false" onclick="showInfoTab('api',this)">API</button>
+        <button class="modal-tab" role="tab" aria-selected="false" onclick="showInfoTab('export',this)">Export</button>
       </div>
       <div id="info-basic" class="info-tab-content active">
         <div class="form-group"><label>First Name</label><input type="text" id="firstName" placeholder="First"></div>
@@ -201,6 +202,18 @@
           <div class="key-status" id="backendAuthStatus" role="status" aria-live="polite">Checking sign-in…</div>
         </div>
         <p class="privacy-note">Voice order: ElevenLabs, Google Standard, then the device voice. Cloud usage has hard monthly ceilings; device speech is always free.</p>
+      </div>
+      <div id="info-export" class="info-tab-content">
+        <h4>Take your Juniper information with you</h4>
+        <p class="privacy-note">Exports never include Google credentials, provider API keys, access tokens, or generated audio.</p>
+        <button class="modal-btn save full" onclick="runJuniperExport('downloadJuniperSetup')">Download portable setup (JSON)</button>
+        <div class="export-options" role="group" aria-label="Information to include in printable packet">
+          <label><input type="checkbox" id="exportProfile" checked> Profile and contact information</label>
+          <label><input type="checkbox" id="exportInsurance"> Insurance</label>
+          <label><input type="checkbox" id="exportPharmacies" checked> Pharmacies</label>
+          <label><input type="checkbox" id="exportScripts" checked> Prepared scripts and phrases</label>
+        </div>
+        <button class="modal-btn full" onclick="runJuniperExport('downloadJuniperPacket')">Download selected packet (PDF)</button>
       </div>
     </div>
   </div>

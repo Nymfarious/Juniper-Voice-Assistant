@@ -2,7 +2,7 @@ const js = require('@eslint/js');
 
 module.exports = [
   {
-    ignores: ['node_modules/**', 'functions/node_modules/**', 'test-results/**', 'playwright-report/**', 'src/js/firebase-client.js']
+    ignores: ['node_modules/**', 'functions/node_modules/**', 'test-results/**', 'playwright-report/**', 'src/js/firebase-client.js', 'src/js/export.js']
   },
   {
     files: ['src/js/*.js'],
@@ -21,7 +21,7 @@ module.exports = [
     }
   },
   {
-    files: ['src/js/firebase-client.module.js'],
+    files: ['src/js/*.module.js'],
     ...js.configs.recommended,
     languageOptions: {
       ecmaVersion: 2022,

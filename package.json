@@ -3,21 +3,22 @@
   "version": "6.4.0",
   "private": true,
   "scripts": {
-    "build:client": "esbuild src/js/firebase-client.module.js --bundle --minify --format=iife --target=es2022 --outfile=src/js/firebase-client.js",
-    "check:js": "node --check src/js/firebase-client.module.js && node --check src/js/helpers.js && node --check src/js/mantis.js && node --check src/js/app.js && node --check src/js/speech.js && node --check src/js/ui.js && node --check src/js/scripts.js && node --check src/js/data.js",
+    "build:client": "esbuild src/js/firebase-client.module.js --bundle --minify --format=iife --target=es2022 --outfile=src/js/firebase-client.js && esbuild src/js/export.module.js --bundle --minify --format=iife --target=es2022 --outfile=src/js/export.js",
+    "check:js": "node --check src/js/firebase-client.module.js && node --check src/js/export.module.js && node --check src/js/helpers.js && node --check src/js/mantis.js && node --check src/js/app.js && node --check src/js/speech.js && node --check src/js/ui.js && node --check src/js/scripts.js && node --check src/js/data.js",
     "lint": "eslint src/js",
     "test": "playwright test",
     "test:a11y": "playwright test --grep @a11y",
     "verify": "npm run build:client && npm run check:js && npm run lint && npm --prefix functions run check && npm test"
   },
   "dependencies": {
-    "firebase": "12.18.0"
+    "firebase": "12.18.0",
+    "jspdf": "^4.2.1"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
     "@eslint/js": "10.0.1",
     "@playwright/test": "1.62.1",
-    "eslint": "10.9.0",
-    "esbuild": "0.28.2"
+    "esbuild": "0.28.2",
+    "eslint": "10.9.0"
   }
 }
