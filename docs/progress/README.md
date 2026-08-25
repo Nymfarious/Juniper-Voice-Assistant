@@ -2,7 +2,14 @@
 
 `JuniperTracker.jsx` is this repo's progress tracker: a self-contained React component whose
 task list is **grounded in real files, lines, and commits in this repo** — not a wish
-list. It was previously an artifact living outside version control; this is its home.
+list.
+
+**Rebuilt 2026-08-24** against `origin/main` @ `7118180` (through PR #19), v6.4.0 — 11 phases,
+79 tasks, and a 21-item verified baseline. The previous version was written at v6.3.0 on
+2026-07-31 and never touched again while 15 PRs landed; by the rebuild over half its 161 tasks
+were answered or obsolete, and it was still warning about plaintext API keys that had been gone
+for three weeks while knowing nothing about the usage ceilings that now govern the app. See
+`NEXT-SESSION.md` at the repo root for the current handoff.
 
 ## How to read it
 - **Phases** group work by theme. Each carries a note explaining *why* the phase exists.
