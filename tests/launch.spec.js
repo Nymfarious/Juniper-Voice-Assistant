@@ -63,6 +63,30 @@ test('keeps private profile data and legacy API keys out of persistent storage',
   expect(storage.sessionInfo).toContain('Private test');
 });
 
+test('exports a portable setup and a selective printable packet without credentials', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Info' }).click();
+  await page.getByRole('tab', { name: 'Export' }).click();
+
+  const setupDownload = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download portable setup (JSON)' }).click();
+  const setup = await setupDownload;
+  const setupText = await (await import('node:fs/promises')).readFile(await setup.path(), 'utf8');
+  const parsed = JSON.parse(setupText);
+  expect(parsed).toMatchObject({ format: 'nymfarious.juniper-setup', version: 1 });
+  expect(setupText).not.toMatch(/apiKey|accessToken|credential|audioBase64/i);
+
+  const packetDownload = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download selected packet (PDF)' }).click();
+  const packet = await packetDownload;
+  if (process.env.RENDER_EXPORT_SAMPLE) {
+    await packet.saveAs('tmp/pdfs/juniper-communication-packet-sample.pdf');
+  }
+  const packetBytes = await (await import('node:fs/promises')).readFile(await packet.path());
+  expect(packetBytes.subarray(0, 4).toString()).toBe('%PDF');
+  expect(packetBytes.byteLength).toBeGreaterThan(2500);
+});
+
 test('handles the ElevenLabs voice catalog boundary and safely renders provider data', async ({ page }) => {
   await page.addInitScript(() => {
     window.JUNIPER_BACKEND_TEST_DOUBLE = {

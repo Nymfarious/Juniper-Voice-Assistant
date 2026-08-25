@@ -189,3 +189,9 @@ function clearPrivateData() {
   MiniMantis.report('private_data_cleared', 'ok');
   window.location.reload();
 }
+
+async function runJuniperExport(action) {
+  await import('./export.js');
+  const handler = window[action];
+  if (typeof handler === 'function') handler();
+}
