@@ -123,7 +123,7 @@ const PHASES = [
     tasks: [
       { id: "D01", label: "3 of 5 stylesheets still carry a v6.3.1 header: agents.css, modals.css, scripts.css. The other 2 and all 7 hand-written JS files say v6.4.0", tag: "DRIFT" },
       { id: "D02", label: "The version is hardcoded in three places that can disagree: app.js MiniMantis.report app_loaded detail, mantis.js appVersion, and package.json. Derive them from one source", tag: "DRIFT" },
-      { id: "D03", label: "desktop.ini is still committed at repo root and still absent from .gitignore. Flagged 2026-07-31 and it has survived all 19 PRs since", tag: "DRIFT" },
+      { id: "D03", label: "✅ FIXED 2026-08-28 — desktop.ini was committed at repo root and absent from .gitignore. Flagged 2026-07-31, survived 20 PRs. Now ignored and untracked; contents were Explorer folder metadata, no secret. Checked across the portfolio: Juniper was the ONLY repo tracking it — TripSafe, Parallax, Magpie and CERTHerd already ignored it", tag: "DRIFT", done: true },
       { id: "D04", label: "ui.js:174 toggleSetting() has zero callers — all three Smart Features toggles ship disabled. Dead code that reads like a live feature", tag: "DRIFT" },
       { id: "D05", label: "helpers.js:88 updateHeaderName() builds a const from nickname/firstName and never uses it; the function sets a fixed string. eslint passes, so the config is not catching unused locals — check that too", tag: "DRIFT" },
       { id: "D06", label: "app.js carries an orphaned API Key Status comment with nothing under it, left behind by the release that moved keys server-side", tag: "DRIFT" },
