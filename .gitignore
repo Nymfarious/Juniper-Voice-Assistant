@@ -9,6 +9,9 @@ functions/node_modules/
 # OS
 .DS_Store
 Thumbs.db
+# The Windows one, on a Windows machine. It was COMMITTED here from the start and
+# every sibling repo that bothered to list it had it right -- this was the gap.
+desktop.ini
 
 # Local env
 .env
